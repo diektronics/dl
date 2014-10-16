@@ -2,6 +2,7 @@
 * Run in some port, use apache proxy to show it in a particular URL diektronics.com/downloader
 * Link per line
 * Maybe use tvd.downloader for plowdown?
+* Do we need notifier?
 * After download hook for unrar
 * Optional name to rename downloaded file
 * Gorilla mux for API
