@@ -16,3 +16,6 @@
   * status (string, not need for purity here)
   * error (text field, empty unless status is ERROR)
   * posthook (unrar, delete downloaded files)
+* Parallel workers for downloading? Yes, queue is scheduler
+* Consider having a big queue channel, and resize it if full. In order for this to work, only one goroutine may add stuff to the channel...
+* Recovery mechanism: get everything in dB that is QUEUED and RUNNING
