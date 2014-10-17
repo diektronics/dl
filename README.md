@@ -11,6 +11,10 @@ TODO
 * Parallel workers for downloading? Yes, queue is scheduler
 * Consider having a big queue channel, and resize it if full. In order for this to work, only one goroutine may add stuff to the channel...
 * Recovery mechanism: get everything in dB that is QUEUED and RUNNING
+* Downloads to temporary dir. Moves final file to ~/Downloads
+* Name is for a dir in ~/Downloads. All downloaded stuff goes in there
+* We can have different queues/workers for posthooks (only implement unrar and delete)
+* We can create a channel/worker per download. As downloader.workers finish with their links, they send the result to that channel. The worker in there updates the types.Download until an error is received or all links have been downloaded. Then executes the posthooks (chan to workers again)
 
 DONE
 ====
