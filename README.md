@@ -3,10 +3,9 @@ TODO
 * REST interface with mysql backend
 * Run in some port, use apache proxy to show it in a particular URL diektronics.com/downloader
 * Link per line
-* Maybe use tvd.downloader for plowdown?
 * Do we need notifier?
 * After download hook for unrar
-* Optional name to rename downloaded file
+* Optional name to rename downloaded file?
 * Gorilla mux for API
 * Parallel workers for downloading? Yes, queue is scheduler
 * Consider having a big queue channel, and resize it if full. In order for this to work, only one goroutine may add stuff to the channel...
