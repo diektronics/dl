@@ -14,6 +14,8 @@ TODO
 * Name is for a dir in ~/Downloads. All downloaded stuff goes in there
 * We can have different queues/workers for posthooks (only implement unrar and delete)
 * We can create a channel/worker per download. As downloader.workers finish with their links, they send the result to that channel. The worker in there updates the types.Download until an error is received or all links have been downloaded. Then executes the posthooks (chan to workers again)
+* Use SSL by default
+* Use user certificates for multiuser support
 
 DONE
 ====
