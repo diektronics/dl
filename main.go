@@ -25,8 +25,8 @@ func main() {
 	}
 
 	d := &types.Download{Name: "test1", Links: []*types.Link{
-		&types.Link{Url: "http://example.com/1.rar"},
-		&types.Link{Url: "http://example.com/2.rar"},
+		&types.Link{URL: "http://example.com/1.rar"},
+		&types.Link{URL: "http://example.com/2.rar"},
 	}}
 	dataBase := db.New(c)
 	if err := dataBase.Add(d); err != nil {

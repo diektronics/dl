@@ -53,7 +53,7 @@ func (d *Db) Add(down *types.Download) error {
 
 	for _, link := range down.Links {
 		res, err := tx.Exec("INSERT INTO links (download_id, url, created_at, modified_at) VALUES (?, ?, ?, ?)",
-			id, link.Url, now, now)
+			id, link.URL, now, now)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -95,7 +95,7 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 	defer rows.Close()
 	for rows.Next() {
 		l := &types.Link{}
-		if err := rows.Scan(&l.ID, &l.Url, &status, &l.CreatedAt, &l.ModifiedAt); err != nil {
+		if err := rows.Scan(&l.ID, &l.URL, &status, &l.CreatedAt, &l.ModifiedAt); err != nil {
 			return nil, err
 		}
 		l.Status = types.Status(status)
@@ -153,6 +153,8 @@ func (d *Db) Del(down *types.Download) error {
 	return nil
 }
 
+// FIXME(diek): even if there is no change, these updates will always change the data
+// because modified_at is set to time.Now().
 func (d *Db) Update(down *types.Download) error {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
@@ -166,18 +168,32 @@ func (d *Db) Update(down *types.Download) error {
 	}
 	now := time.Now()
 	for _, l := range down.Links {
-		_, err = tx.Exec("UPDATE links SET status=?, modified_at=? WHERE id=?",
+		res, err := tx.Exec("UPDATE links SET status=?, modified_at=? WHERE id=?",
 			string(l.Status), now, l.ID)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
+		if n, err := res.RowsAffected(); err != nil {
+			tx.Rollback()
+			return err
+		} else if n == 1 {
+			l.ModifiedAt = now
+
+		}
 	}
-	_, err = tx.Exec("UPDATE downloads SET status=?, error=?, modified_at=? WHERE id=?",
+	res, err := tx.Exec("UPDATE downloads SET status=?, error=?, modified_at=? WHERE id=?",
 		string(down.Status), down.Error, now, down.ID)
 	if err != nil {
 		tx.Rollback()
 		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		tx.Rollback()
+		return err
+	} else if n == 1 {
+		down.ModifiedAt = now
+
 	}
 
 	tx.Commit()
