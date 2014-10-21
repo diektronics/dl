@@ -6,8 +6,8 @@ type Hook struct {
 }
 
 type Data struct {
-	files []string
-	ch    chan error
+	Files []string
+	Ch    chan error
 }
 
 var all map[string]*Hook
@@ -21,11 +21,11 @@ func New(name string, worker func(int, *Hook), nWorkers int) *Hook {
 	return h
 }
 
-func Names() ([]string, error) {
+func Names() []string {
 	return names
 }
 
-func Hooks() map[string]*Hook {
+func All() map[string]*Hook {
 	return all
 }
 

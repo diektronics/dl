@@ -33,7 +33,6 @@ func New(c *cfg.Configuration, nWorkers int) *downloader {
 	d := &downloader{
 		q:  make(chan *link, 1000),
 		db: db.New(c),
-		h:  hook.Hooks(),
 	}
 	for i := 0; i < nWorkers; i++ {
 		go d.worker(i)
@@ -56,13 +55,13 @@ func (d *downloader) download(down *types.Download) {
 	if err := d.db.Update(down); err != nil {
 		log.Println("download: error updating:", err)
 	}
-	ch := make(chan types.Link, len(down.Links))
+	ch := make(chan *types.Link, len(down.Links))
 	for _, l := range down.Links {
 		d.q <- &link{l, down.Name, ch}
 	}
 	i := 0
 	for i < len(down.Links) {
-		l <- ch
+		l := <-ch
 		if l.Status != types.Success {
 			down.Status = l.Status
 			down.Error += fmt.Sprintln("download:", l.URL, "failed to download")
@@ -81,20 +80,21 @@ func (d *downloader) download(down *types.Download) {
 	}
 
 	hooks := strings.Split(down.Posthook, ",")
-	for _, hook := range hooks {
-		hook = strings.TrimSpace(hook)
-		if h, ok := d.h[hook]; !ok {
+	for _, hookName := range hooks {
+		hookName = strings.TrimSpace(hookName)
+		h, ok := hook.All()[hookName]
+		if !ok {
 			down.Status = types.Error
-			down.Error += fmt.Sprintln("download:", hook, "does not exist")
+			down.Error += fmt.Sprintln("download:", hookName, "does not exist")
 			break
 		}
 		ch := make(chan error)
 		data := &hook.Data{files, ch}
 		h.Channel() <- data
-		err := <-data.ch
+		err := <-data.Ch
 		if err != nil {
 			down.Status = types.Error
-			down.Error += fmt.Sprintln("download:", hook, "failed", err)
+			down.Error += fmt.Sprintln("download:", h.Name(), "failed", err)
 			break
 		}
 
@@ -133,7 +133,7 @@ func (d *downloader) worker(i int) {
 			log.Println(i, "output:", string(output))
 			l.l.Status = types.Error
 		} else {
-			parts = strings.Split(strings.TrimSpace(string(output)), "\n")
+			parts := strings.Split(strings.TrimSpace(string(output)), "\n")
 			l.l.Filename = parts[len(parts)-1]
 			log.Println(i, l.l.URL, "download complete")
 			l.l.Status = types.Success

@@ -20,17 +20,17 @@ func unrar(i int, h *Hook) {
 		case data := <-h.ch:
 			var err error
 			// sort alphabeticallt data.files, and pass the first one to unrar x
-			sort.Strings(data.files)
-			if len(data.files) > 0 {
+			sort.Strings(data.Files)
+			if len(data.Files) > 0 {
 				cmd := []string{"/usr/bin/unrar",
-					"x", data.files[0], filepath.Dir(data.files[0])}
+					"x", data.Files[0], filepath.Dir(data.Files[0])}
 				output, err := exec.Command(cmd[0], cmd[1:]...).CombinedOutput()
 				if err != nil {
 					log.Println(i, "err:", err)
 					log.Println(i, "output:", string(output))
 				}
 			}
-			data.ch <- err
+			data.Ch <- err
 		}
 	}
 }
