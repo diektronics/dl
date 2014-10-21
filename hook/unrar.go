@@ -1,5 +1,12 @@
 package hook
 
+import (
+	"log"
+	"os/exec"
+	"path/filepath"
+	"sort"
+)
+
 func init() {
 	// only one worker, unrar takes many resources, better to serialize it
 	all["UNRAR"] = New("UNRAR", unrar, 1)
@@ -7,5 +14,23 @@ func init() {
 }
 
 func unrar(i int, h *Hook) {
-
+	log.Println(i, "ready for action")
+	for {
+		select {
+		case data := <-h.ch:
+			var err error
+			// sort alphabeticallt data.files, and pass the first one to unrar x
+			sort.Strings(data.files)
+			if len(data.files) > 0 {
+				cmd := []string{"/usr/bin/unrar",
+					"x", data.files[0], filepath.Dir(data.files[0])}
+				output, err := exec.Command(cmd[0], cmd[1:]...).CombinedOutput()
+				if err != nil {
+					log.Println(i, "err:", err)
+					log.Println(i, "output:", string(output))
+				}
+			}
+			data.ch <- err
+		}
+	}
 }
