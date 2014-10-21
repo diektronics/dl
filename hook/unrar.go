@@ -1,13 +1,11 @@
 package hook
 
-type unrar struct {
-	ch chan *Data
+func init() {
+	// only one worker, unrar takes many resources, better to serialize it
+	all["UNRAR"] = New("UNRAR", unrar, 1)
+	names = append(names, "UNRAR")
 }
 
-func (u *unrar) Name(*Data) string {
-	return "UNRAR"
-}
+func unrar(i int, h *Hook) {
 
-func (u *unrar) Channel() chan *Data {
-	return ch
 }

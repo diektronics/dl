@@ -1,8 +1,8 @@
 package hook
 
-type Hook interface {
-	Name() string
-	Channel() chan *Data
+type Hook struct {
+	name string
+	ch   chan *Data
 }
 
 type Data struct {
@@ -13,14 +13,12 @@ type Data struct {
 var all map[string]*Hook
 var names []string
 
-func init() {
-	u := &unrar{make(chan *Data)}
-	all[u.Name()] = u
-	names = append(names, u.Name())
-
-	r := &remove{make(chan *Data)}
-	all[r.Name()] = r
-	names = append(names, r.Name())
+func New(name string, worker func(int, *Hook), nWorkers int) *Hook {
+	h := &Hook{name: name, ch: make(chan *Data, 100)}
+	for i := 0; i < nWorkers; i++ {
+		go worker(i, h)
+	}
+	return h
 }
 
 func Names() ([]string, error) {
@@ -29,4 +27,12 @@ func Names() ([]string, error) {
 
 func Hooks() map[string]*Hook {
 	return all
+}
+
+func (h *Hook) Name() string {
+	return h.name
+}
+
+func (h *Hook) Channel() chan *Data {
+	return h.ch
 }
