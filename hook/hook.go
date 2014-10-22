@@ -21,18 +21,10 @@ func New(name string, worker func(int, *Hook), nWorkers int) *Hook {
 	return h
 }
 
-func Names() []string {
-	return names
-}
+func Names() []string { return names }
 
-func All() map[string]*Hook {
-	return all
-}
+func All() map[string]*Hook { return all }
 
-func (h *Hook) Name() string {
-	return h.name
-}
+func (h *Hook) Name() string { return h.name }
 
-func (h *Hook) Channel() chan *Data {
-	return h.ch
-}
+func (h *Hook) Channel() chan *Data { return h.ch }

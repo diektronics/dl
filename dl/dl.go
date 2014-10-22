@@ -112,7 +112,7 @@ func (d *downloader) worker(i int) {
 
 	for l := range d.q {
 		// TODO(diek): make this into a downloader var, and get it from cfg.Configuration
-		destination := "~/Downloads/" + l.dirName
+		destination := "/mnt/data/video/downs/" + l.dirName
 		if err := os.MkdirAll(destination, 0777); err != nil {
 			log.Println(i, "err:", err)
 			log.Println(i, "cannot create directory:", destination)
