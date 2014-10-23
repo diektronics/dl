@@ -136,6 +136,7 @@ func (d *Downloader) worker(i int) {
 			l.l.Status = types.Success
 		}
 		l.ch <- l.l
+		log.Println("download:", i, "len(l.ch)=", len(l.ch))
 	}
 }
 
