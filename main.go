@@ -10,6 +10,7 @@ import (
 	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/dl"
 	"diektronics.com/carter/dl/server"
+	"diektronics.com/carter/dl/types"
 )
 
 var cfgFile = flag.String(
@@ -26,7 +27,7 @@ func main() {
 	}
 
 	// TODO(diek): do recovery, all that is RUNNING becomes QUEUED, then all that is QUEUED goes to the queue.
-	d:= dl.New(c, 5)
+	d := dl.New(c, 5)
 	server.New(d).Run()
 
 	d.Download(&types.Download{Name: "Test 1",
