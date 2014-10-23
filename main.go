@@ -39,6 +39,15 @@ func main() {
 		Posthook: "UNRAR,REMOVE",
 	})
 
+	d.Download(&types.Download{Name: "Test 2",
+		Links: []*types.Link{
+			&types.Link{URL: "http://www.uploadable.ch/file/sNfB6fVsMmy7/test1.part1.rar"},
+			&types.Link{URL: "http://www.uploadable.ch/file/29nM4NpTJ8HH/test1.part2.rar"},
+			&types.Link{URL: "http://www.uploadable.ch/file/AHzPVTgAZExM/test1.part3.rar"},
+		},
+		Posthook: "UNRAR,REMOVE",
+	})
+
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
