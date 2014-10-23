@@ -13,8 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const DownPrefix = "/api/down"
-const HookPrefix = "/api/hook"
+const DownPrefix = "/down"
+const HookPrefix = "/hook"
 
 type Server struct {
 	d *dl.Downloader
@@ -35,8 +35,10 @@ func (s *Server) Run() {
 	s2 := r.PathPrefix(HookPrefix).Subrouter()
 	s2.HandleFunc("/", errorHandler(s.listHooks)).Methods("GET")
 
-	http.Handle("/api", r)
-	http.Handle("/", http.FileServer(http.Dir("src/diektronics.com/carter/dl/server/static")))
+	s3 := r.PathPrefix("/").Subrouter()
+	s3.Handle("/", http.FileServer(http.Dir("src/diektronics.com/carter/dl/server/static")))
+
+	http.Handle("/", r)
 	// 2. Run server
 	go http.ListenAndServe(":4444", nil)
 }
