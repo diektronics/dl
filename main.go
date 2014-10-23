@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"os/signal"
 
 	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/dl"
@@ -41,4 +42,8 @@ func main() {
 			&types.Link{URL: "http://www.uploadable.ch/file/hX2cHG5c5NNu/thtdos13.ex.1080p-gec.part13.rar"},
 			&types.Link{URL: "http://www.uploadable.ch/file/fGzxbgEPspBD/thtdos13.ex.1080p-gec.part14.rar"},
 		}})
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	<-signalChan
 }
