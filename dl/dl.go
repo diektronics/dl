@@ -70,6 +70,7 @@ func (d *Downloader) download(down *types.Download) {
 		return
 	}
 
+	log.Println("download: all downloads complete, about to run posthooks", down.Posthook)
 	files := make([]string, len(down.Links))
 	for i, l := range down.Links {
 		files[i] = l.Filename
@@ -136,7 +137,6 @@ func (d *Downloader) worker(i int) {
 			l.l.Status = types.Success
 		}
 		l.ch <- l.l
-		log.Println("download:", i, "len(l.ch)=", len(l.ch))
 	}
 }
 
