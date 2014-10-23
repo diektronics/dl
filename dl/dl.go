@@ -55,8 +55,8 @@ func (d *Downloader) download(down *types.Download) {
 	for _, l := range down.Links {
 		d.q <- &link{l, down.Name, ch}
 	}
-	i := 0
-	for i < len(down.Links) {
+
+	for i := 0; i < len(down.Links); i++ {
 		l := <-ch
 		if l.Status != types.Success {
 			down.Status = l.Status
