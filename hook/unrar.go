@@ -18,7 +18,6 @@ func unrar(i int, h *Hook) {
 	for {
 		select {
 		case data := <-h.ch:
-			log.Println("unrar:", i, "got data", data)
 			var err error
 			// sort alphabeticallt data.files, and pass the first one to unrar x
 			sort.Strings(data.Files)

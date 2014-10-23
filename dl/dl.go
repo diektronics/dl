@@ -49,7 +49,7 @@ func (d *Downloader) Download(down *types.Download) error {
 func (d *Downloader) download(down *types.Download) {
 	down.Status = types.Running
 	if err := d.db.Update(down); err != nil {
-		log.Println("download: error updating:", err)
+		log.Println("download:", down.Name, "error updating:", err)
 	}
 	ch := make(chan *types.Link, len(down.Links))
 	for _, l := range down.Links {
@@ -60,17 +60,17 @@ func (d *Downloader) download(down *types.Download) {
 		l := <-ch
 		if l.Status != types.Success {
 			down.Status = l.Status
-			down.Error += fmt.Sprintln("download:", l.URL, "failed to download")
+			down.Error += fmt.Sprintln("download:", down.Name, l.URL, "failed to download")
 		}
 		if err := d.db.Update(down); err != nil {
-			log.Println("download: error updating:", err)
+			log.Println("download:", down.Name, "error updating:", err)
 		}
 	}
 	if down.Status != types.Running {
 		return
 	}
 
-	log.Println("download: all downloads complete, about to run posthooks", down.Posthook)
+	log.Println("download:", down.Name, "all downloads complete, about to run posthooks", down.Posthook)
 	files := make([]string, len(down.Links))
 	for i, l := range down.Links {
 		files[i] = l.Filename
@@ -82,20 +82,20 @@ func (d *Downloader) download(down *types.Download) {
 		h, ok := hook.All()[hookName]
 		if !ok {
 			down.Status = types.Error
-			down.Error += fmt.Sprintln("download:", hookName, "does not exist")
+			down.Error += fmt.Sprintln("download:", down.Name, hookName, "does not exist")
 			break
 		}
-		log.Println("download: about to run posthook", hookName)
+		log.Println("download:", down.Name, "about to run posthook", hookName)
 		ch := make(chan error)
 		data := &hook.Data{files, ch}
 		h.Channel() <- data
 		err := <-data.Ch
 		if err != nil {
 			down.Status = types.Error
-			down.Error += fmt.Sprintln("download:", h.Name(), "failed", err)
+			down.Error += fmt.Sprintln("download:", down.Name, h.Name(), "failed", err)
 			break
 		}
-
+		log.Println("download:", down.Name, h.Name(), "ran successfully")
 	}
 	if down.Status == types.Running {
 		down.Status = types.Success
@@ -103,6 +103,7 @@ func (d *Downloader) download(down *types.Download) {
 	if err := d.db.Update(down); err != nil {
 		log.Println("download: error updating:", err)
 	}
+	log.Println("download:", down.Name, "all done, going away")
 }
 
 func (d *Downloader) worker(i int) {
