@@ -84,6 +84,7 @@ func (d *Downloader) download(down *types.Download) {
 			down.Error += fmt.Sprintln("download:", hookName, "does not exist")
 			break
 		}
+		log.Println("download: about to run posthook", hookName)
 		ch := make(chan error)
 		data := &hook.Data{files, ch}
 		h.Channel() <- data

@@ -13,14 +13,14 @@ func init() {
 }
 
 func remove(i int, h *Hook) {
-	log.Println(i, "ready for action")
+	log.Println("remove:", i, "ready for action")
 	for {
 		select {
 		case data := <-h.ch:
 			var err error
 			for _, file := range data.Files {
 				if err = os.Remove(file); err != nil {
-					log.Println("unrar: error removing", file, err)
+					log.Println("remove: error removing", file, err)
 					break
 				}
 			}
