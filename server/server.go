@@ -8,11 +8,13 @@ import (
 	"strconv"
 
 	"diektronics.com/carter/dl/dl"
+	"diektronics.com/carter/dl/hook"
 	"diektronics.com/carter/dl/types"
 	"github.com/gorilla/mux"
 )
 
-const PathPrefix = "/down/"
+const DownPrefix = "/down"
+const HookPrefix = "/hook"
 
 type Server struct {
 	d *dl.Downloader
@@ -25,11 +27,15 @@ func New(d *dl.Downloader) *Server {
 func (s *Server) Run() {
 	// 1. Register paths
 	r := mux.NewRouter()
-	r.HandleFunc(PathPrefix, errorHandler(s.listDowns)).Methods("GET")
-	r.HandleFunc(PathPrefix, errorHandler(s.newDown)).Methods("POST")
-	r.HandleFunc(PathPrefix+"{id}", errorHandler(s.getDown)).Methods("GET")
+	s1 := r.PathPrefix(DownPrefix).Subrouter()
+	s1.HandleFunc("/", errorHandler(s.listDowns)).Methods("GET")
+	s1.HandleFunc("/", errorHandler(s.newDown)).Methods("POST")
+	s1.HandleFunc("/{id}", errorHandler(s.getDown)).Methods("GET")
 
-	http.Handle(PathPrefix, r)
+	s2 := r.PathPrefix(HookPrefix).Subrouter()
+	s2.HandleFunc("/", errorHandler(s.listHooks)).Methods("GET")
+
+	http.Handle("/api", r)
 	http.Handle("/", http.FileServer(http.Dir("src/diektronics.com/carter/dl/server/static")))
 	// 2. Run server
 	go http.ListenAndServe(":4444", nil)
@@ -91,4 +97,9 @@ func parseID(r *http.Request) (int64, error) {
 		return 0, fmt.Errorf("down id not found")
 	}
 	return strconv.ParseInt(txt, 10, 0)
+}
+
+func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
+	res := struct{ Hooks []string }{hook.Names()}
+	return json.NewEncoder(w).Encode(res)
 }
