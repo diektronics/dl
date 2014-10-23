@@ -13,6 +13,10 @@ type Data struct {
 var all map[string]*Hook
 var names []string
 
+func init() {
+	all = make(map[string]*Hook)
+}
+
 func New(name string, worker func(int, *Hook), nWorkers int) *Hook {
 	h := &Hook{name: name, ch: make(chan *Data, 100)}
 	for i := 0; i < nWorkers; i++ {
