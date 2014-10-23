@@ -24,7 +24,8 @@ func unrar(i int, h *Hook) {
 			if len(data.Files) > 0 {
 				cmd := []string{"/usr/bin/unrar",
 					"x", data.Files[0], filepath.Dir(data.Files[0])}
-				output, err := exec.Command(cmd[0], cmd[1:]...).CombinedOutput()
+				var output []byte
+				output, err = exec.Command(cmd[0], cmd[1:]...).CombinedOutput()
 				if err != nil {
 					log.Println("unrar:", i, "err:", err)
 					log.Println("unrar:", i, "output:", string(output))
