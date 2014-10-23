@@ -13,11 +13,7 @@ import (
 	"diektronics.com/carter/dl/types"
 )
 
-type Downloader interface {
-	Download(*types.Download) error
-}
-
-type downloader struct {
+type Downloader struct {
 	q  chan *link
 	db *db.Db
 	h  []*hook.Hook
@@ -29,8 +25,8 @@ type link struct {
 	ch      chan *types.Link
 }
 
-func New(c *cfg.Configuration, nWorkers int) *downloader {
-	d := &downloader{
+func New(c *cfg.Configuration, nWorkers int) *Downloader {
+	d := &Downloader{
 		q:  make(chan *link, 1000),
 		db: db.New(c),
 	}
@@ -41,7 +37,7 @@ func New(c *cfg.Configuration, nWorkers int) *downloader {
 	return d
 }
 
-func (d *downloader) Download(down *types.Download) error {
+func (d *Downloader) Download(down *types.Download) error {
 	if err := d.db.Add(down); err != nil {
 		return err
 	}
@@ -50,7 +46,7 @@ func (d *downloader) Download(down *types.Download) error {
 	return nil
 }
 
-func (d *downloader) download(down *types.Download) {
+func (d *Downloader) download(down *types.Download) {
 	down.Status = types.Running
 	if err := d.db.Update(down); err != nil {
 		log.Println("download: error updating:", err)
@@ -107,20 +103,20 @@ func (d *downloader) download(down *types.Download) {
 	}
 }
 
-func (d *downloader) worker(i int) {
-	log.Println(i, "ready for action")
+func (d *Downloader) worker(i int) {
+	log.Println("download:", i, "ready for action")
 
 	for l := range d.q {
-		// TODO(diek): make this into a downloader var, and get it from cfg.Configuration
+		// TODO(diek): make this into a Downloader var, and get it from cfg.Configuration
 		destination := "/mnt/data/video/downs/" + l.dirName
 		if err := os.MkdirAll(destination, 0777); err != nil {
-			log.Println(i, "err:", err)
-			log.Println(i, "cannot create directory:", destination)
+			log.Println("download:", i, "err:", err)
+			log.Println("download:", i, "cannot create directory:", destination)
 			l.l.Status = types.Error
 			l.ch <- l.l
 			continue
 		}
-		log.Printf("%d getting %q into %q\n", i, l.l.URL, destination)
+		log.Printf("download: %d getting %q into %q\n", i, l.l.URL, destination)
 		cmd := []string{"/home/carter/bin/plowdown",
 			"--engine=xfilesharing",
 			"--output-directory=" + destination,
@@ -129,15 +125,17 @@ func (d *downloader) worker(i int) {
 			l.l.URL}
 		output, err := exec.Command(cmd[0], cmd[1:]...).CombinedOutput()
 		if err != nil {
-			log.Println(i, "err:", err)
-			log.Println(i, "output:", string(output))
+			log.Println("download:", i, "err:", err)
+			log.Println("download:", i, "output:", string(output))
 			l.l.Status = types.Error
 		} else {
 			parts := strings.Split(strings.TrimSpace(string(output)), "\n")
 			l.l.Filename = parts[len(parts)-1]
-			log.Println(i, l.l.URL, "download complete")
+			log.Println("download:", i, l.l.URL, "download complete")
 			l.l.Status = types.Success
 		}
 		l.ch <- l.l
 	}
 }
+
+func (d *Downloader) Db() *db.Db { return d.db }

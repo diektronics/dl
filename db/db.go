@@ -108,6 +108,49 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 	return down, nil
 }
 
+func (d *Db) GetAll() ([]*types.Download, error) {
+	db, err := sql.Open("mysql", d.connectionString)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	downs := []*types.Download{}
+	var status string
+	rows, err := db.Query("SELECT id, name, status, error, posthook, created_at, modified_at FROM downloads")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		down := &types.Download{}
+		if err := rows.Scan(&down.ID, &down.Name, &status, &down.Error, &down.Posthook, &down.CreatedAt, &down.ModifiedAt); err != nil {
+			return nil, err
+		}
+		down.Status = types.Status(status)
+
+		rowsLinks, err := db.Query("SELECT id, url, status, created_at, modified_at FROM links WHERE download_id=?", down.ID)
+		if err != nil {
+			return nil, err
+		}
+		defer rowsLinks.Close()
+		for rowsLinks.Next() {
+			l := &types.Link{}
+			if err := rowsLinks.Scan(&l.ID, &l.URL, &status, &l.CreatedAt, &l.ModifiedAt); err != nil {
+				return nil, err
+			}
+			l.Status = types.Status(status)
+			down.Links = append(down.Links, l)
+		}
+		if err := rowsLinks.Err(); err != nil {
+			return nil, err
+		}
+
+		downs = append(downs, down)
+	}
+	return downs, nil
+}
+
 func (d *Db) Del(down *types.Download) error {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
@@ -131,7 +174,7 @@ func (d *Db) Del(down *types.Download) error {
 	}
 	if n != int64(len(down.Links)) {
 		tx.Rollback()
-		return fmt.Errorf("unexpected rows affected: %v != %v", n, len(down.Links))
+		return fmt.Errorf("Del: unexpected rows affected %v != %v", n, len(down.Links))
 	}
 
 	res, err = tx.Exec("DELETE FROM downloads WHERE id=?", down.ID)
@@ -146,7 +189,7 @@ func (d *Db) Del(down *types.Download) error {
 	}
 	if n != 1 {
 		tx.Rollback()
-		return fmt.Errorf("unexpected rows affected: %v != 1", n)
+		return fmt.Errorf("Del: unexpected rows affected %v != 1", n)
 	}
 
 	tx.Commit()
