@@ -13,8 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const DownPrefix = "/down"
-const HookPrefix = "/hook"
+const DownPrefix = "/api/down"
+const HookPrefix = "/api/hook"
 
 type Server struct {
 	d *dl.Downloader
