@@ -29,8 +29,8 @@ angular.module('downApp', [])
         success(function() {
           refresh().then(function() {
             $scope.working = false;
-            //$scope.downName = '';
-            //$scope.downLinks = '';
+            $scope.downName = '';
+            $scope.downLinks = '';
           })
         });
     };
