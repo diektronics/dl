@@ -31,9 +31,8 @@ li {
 	list-style: none;
 	padding: 5px;
 }
-li.done {
-	color: #888;
-	text-decoration: line-through;
+li.ERROR {
+	color: red;
 }
 
 li > .checkbox {
@@ -45,7 +44,7 @@ li > .checkbox {
 	border-radius: 2px;
 	border: 1px #ddd solid;
 }
-li.done > .checkbox {
+li.ERROR > .checkbox {
 	background: #888;	
 }
 

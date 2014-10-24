@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"diektronics.com/carter/dl/dl"
 	"diektronics.com/carter/dl/hook"
@@ -70,7 +71,6 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 }
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
-	log.Println("GET down")
 	downs, err := s.d.Db().GetAll()
 	if err != nil {
 		return err
@@ -79,10 +79,37 @@ func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
 	return json.NewEncoder(w).Encode(res)
 }
 
-func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error { return nil }
+func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
+	req := struct {
+		Name  string
+		Links string
+		Hooks map[string]bool
+	}{}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return badRequest{err}
+	}
+	log.Println(req)
+
+	hooks := []string{}
+	for h := range req.Hooks {
+		hooks = append(hooks, h)
+	}
+	links := []*types.Link{}
+	for _, url := range strings.Split(req.Links, "\n") {
+		l := &types.Link{URL: strings.TrimSpace(url)}
+		links = append(links, l)
+	}
+	down := &types.Download{Name: req.Name, Posthook: strings.Join(hooks, ","), Links: links}
+	if err := s.d.Download(down); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 	id, err := parseID(r)
-	log.Println("Down is ", id)
 	if err != nil {
 		return badRequest{err}
 	}

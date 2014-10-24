@@ -1,11 +1,19 @@
 angular.module('downApp', [])
   .controller('DownCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.downs = [];
+    $scope.hooks = [];
+    $scope.downHooks = {};
     $scope.working = false;
 
     var logError = function(data, status) {
       console.log('code '+status+': '+data);
       $scope.working = false;
+    };
+
+    var getHooks = function() {
+      return $http.get('/hook/').
+        success(function(data) { $scope.hooks = data.Hooks; }).
+        error(logError);
     };
 
     var refresh = function() {
@@ -14,14 +22,15 @@ angular.module('downApp', [])
         error(logError);
     };
 
-    $scope.addTodo = function() {
+    $scope.addDownload = function() {
       $scope.working = true;
-      $http.post('/task/', {Title: $scope.todoText}).
+      $http.post('/down/', {Name: $scope.downName, Links: $scope.downLinks, Hooks: $scope.downHooks}).
         error(logError).
         success(function() {
           refresh().then(function() {
             $scope.working = false;
-            $scope.todoText = '';
+            //$scope.downName = '';
+            //$scope.downLinks = '';
           })
         });
     };
@@ -33,6 +42,7 @@ angular.module('downApp', [])
       //   success(function() { task.Done = !task.Done });
     };
 
+    getHooks();
     refresh().then(function() { $scope.working = false; });
   
 }]);

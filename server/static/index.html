@@ -13,12 +13,23 @@
 <body>
   <div class="container" ng-controller="DownCtrl">
     <h1 class="charcoal rounded-box">download</h1>
+    <form>
+      <input type="text" class="rounded-box" placeholder="Name" ng-model="downName">
+      <span ng-repeat="h in hooks">
+        <label class="checkbox" for="{{h}}">
+          <input type="checkbox" name="hooks" value="{{h}}" id="{{h}}" ng-model="downHooks[h]">{{h}}
+        </label>
+      </span>
+      <br />
+      <textarea name="links" cols="40" rows="5" ng-model="downLinks"></textarea>
+      <button class='grey rounded-box' ng-click='addDownload()' ng-disabled='working'>Get Down</button>
+    </form>
 
     <h2>downloads</h2>
 
     <ul class="grey rounded-box">
       <li ng-repeat="d in downs" ng-class="{status: d.Status}" ng-click="expand(d)">
-        <span class="checkbox"></span>{{d.Name}}
+        <span class="">+</span>{{d.Name}}
       </li>
     </ul>
   </div>
