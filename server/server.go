@@ -35,8 +35,7 @@ func (s *Server) Run() {
 	s2 := r.PathPrefix(HookPrefix).Subrouter()
 	s2.HandleFunc("/", errorHandler(s.listHooks)).Methods("GET")
 
-	s3 := r.PathPrefix("/").Subrouter()
-	s3.Handle("/", http.FileServer(http.Dir("src/diektronics.com/carter/dl/server/static")))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("src/diektronics.com/carter/dl/server/static"))))
 
 	http.Handle("/", r)
 	// 2. Run server
@@ -71,6 +70,7 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 }
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
+	log.Println("GET down")
 	downs, err := s.d.Db().GetAll()
 	if err != nil {
 		return err
