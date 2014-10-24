@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -100,6 +101,8 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 		l := &types.Link{URL: strings.TrimSpace(url)}
 		links = append(links, l)
 	}
+	// FIXME(diek): UNRAR hook has to happen BEFORE REMOVE hook. sort inversely...
+	sort.Sort(sort.Reverse(sort.StringSlice(hooks)))
 	down := &types.Download{Name: req.Name, Posthook: strings.Join(hooks, ","), Links: links}
 	if err := s.d.Download(down); err != nil {
 		return err
