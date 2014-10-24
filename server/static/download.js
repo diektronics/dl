@@ -11,20 +11,20 @@ angular.module('downApp', [])
     };
 
     var getHooks = function() {
-      return $http.get('/hook/').
+      return $http.get('hook/').
         success(function(data) { $scope.hooks = data.Hooks; }).
         error(logError);
     };
 
     var refresh = function() {
-      return $http.get('/down/').
+      return $http.get('down/').
         success(function(data) { $scope.downs = data.Downs; }).
         error(logError);
     };
 
     $scope.addDownload = function() {
       $scope.working = true;
-      $http.post('/down/', {Name: $scope.downName, Links: $scope.downLinks, Hooks: $scope.downHooks}).
+      $http.post('down/', {Name: $scope.downName, Links: $scope.downLinks, Hooks: $scope.downHooks}).
         error(logError).
         success(function() {
           refresh().then(function() {
