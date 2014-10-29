@@ -37,7 +37,7 @@ angular.module('downApp', [])
         });
     };
 
-    $scope.expando = function(down) {
+    $scope.toggleVisibility = function(down) {
       $scope.visible[down.ID] = !$scope.visible[down.ID];
     };
 
