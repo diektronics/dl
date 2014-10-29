@@ -33,6 +33,7 @@ func (s *Server) Run() {
 	s1.HandleFunc("/", errorHandler(s.listDowns)).Methods("GET")
 	s1.HandleFunc("/", errorHandler(s.newDown)).Methods("POST")
 	s1.HandleFunc("/{id}", errorHandler(s.getDown)).Methods("GET")
+	s1.HandleFunc("/{id}", errorHandler(s.letDown)).Methods("DELETE")
 
 	s2 := r.PathPrefix(HookPrefix).Subrouter()
 	s2.HandleFunc("/", errorHandler(s.listHooks)).Methods("GET")
@@ -121,6 +122,21 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 		return notFound{}
 	}
 	return json.NewEncoder(w).Encode(down)
+}
+
+func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
+	id, err := parseID(r)
+	if err != nil {
+		return badRequest{err}
+	}
+	down, err := s.d.Db().Get(id)
+	if err != nil {
+		return notFound{}
+	}
+	if err := s.d.Db().Del(down); err != nil {
+		return notFound{}
+	}
+	return nil
 }
 
 func parseID(r *http.Request) (int64, error) {

@@ -37,6 +37,17 @@ angular.module('downApp', [])
         });
     };
 
+    $scope.delDownload = function(down) {
+      $scope.working = true;
+      $http.delete('down/' + down.ID).
+        error(logError).
+        success(function() {
+          refresh().then(function() {
+            $scope.working = false;
+          })
+        });
+    };
+
     $scope.toggleVisibility = function(down) {
       $scope.visible[down.ID] = !$scope.visible[down.ID];
     };

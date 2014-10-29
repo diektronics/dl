@@ -22,7 +22,7 @@
       </span>
       <br />
       <textarea name="links" cols="60" rows="10" placeholder="Links" ng-model="downLinks"></textarea>
-      <button class='grey rounded-box' ng-click='addDownload()' ng-disabled='working'>Get Down</button>
+      <button class="grey rounded-box" ng-click="addDownload()" ng-disabled="working">Get Down</button>
     </form>
 
     <h2>downloads</h2>
@@ -38,6 +38,7 @@
             <ul>
               <li ng-repeat="l in d.Links"><span class="{{l.Status}}">{{l.URL}}</span></li>
             </ul>
+            <li><span ng-click="delDownload(d)">DELETE THIS DOWNLOAD</span></li>
           </ul>
         </div>
       </li>
