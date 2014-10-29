@@ -32,6 +32,11 @@
         <div ng-show="visible[d.ID]">
           <ul>
             <li>Status: {{d.Status}}</li>
+            <li>Error: {{d.Error}}</li>
+            <li>Hooks: {{d.PostHook}}</li>
+            <ul>
+              <li ng-repeat="l in d.Links"><span class="{{l.Status}}">{{l.URL}}</span></li>
+            </ul>
           </ul>
         </div>
       </li>
