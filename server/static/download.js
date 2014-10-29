@@ -4,6 +4,7 @@ angular.module('downApp', [])
     $scope.hooks = [];
     $scope.downHooks = {};
     $scope.working = false;
+    $scope.visible = {};
 
     var logError = function(data, status) {
       console.log('code '+status+': '+data);
@@ -31,16 +32,18 @@ angular.module('downApp', [])
             $scope.working = false;
             $scope.downName = '';
             $scope.downLinks = '';
+            $scope.downHooks = {};
           })
         });
     };
 
-    $scope.expand = function(down) {
-      data = {ID: down.ID, Name: down.Name, Status: !down.Status}
-      // $http.put('/task/'+task.ID, data).
-      //   error(logError).
-      //   success(function() { task.Done = !task.Done });
+    $scope.expando = function(down) {
+      $scope.visible[down.ID] = !$scope.visible[down.ID];
     };
+
+    $scope.moreOrLess = function(down) {
+      return $scope.visible[down.ID] ? '-' : '+';
+    }
 
     getHooks();
     refresh().then(function() { $scope.working = false; });
