@@ -79,6 +79,9 @@ func (d *Downloader) download(down *types.Download) {
 	hooks := strings.Split(down.Posthook, ",")
 	for _, hookName := range hooks {
 		hookName = strings.TrimSpace(hookName)
+		if len(hookname) == 0 {
+			continue
+		}
 		h, ok := hook.All()[hookName]
 		if !ok {
 			down.Status = types.Error
