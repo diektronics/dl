@@ -49,6 +49,10 @@ li {
 	color: red;
 }
 
+.WARNING {
+	color: white;
+	background-color: red;
+}
 li > .checkbox {
 	display: inline-block;
 	width: 10px;

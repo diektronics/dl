@@ -1,5 +1,5 @@
 angular.module('downApp', [])
-  .controller('DownCtrl', ['$scope', '$http', function($scope, $http) {
+  .controller('DownCtrl', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
     $scope.downs = [];
     $scope.hooks = [];
     $scope.downHooks = {};
@@ -59,4 +59,7 @@ angular.module('downApp', [])
     getHooks();
     refresh().then(function() { $scope.working = false; });
   
+    var autoRefresh = $interval(function() {
+      refresh();
+    }, 5000);
 }]);
