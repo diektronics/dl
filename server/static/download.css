@@ -4,6 +4,7 @@ body {
 	max-width: 480px;
 	margin: 0 auto;
 	background: #f8f8f8;
+	word-wrap: break-word;
 }
 
 body, input, button {
@@ -36,6 +37,13 @@ li {
 	cursor: pointer;
 }
 
+a {
+	text-decoration: none;
+}
+
+.item {
+	list-style-type: disc;
+}
 .QUEUED {
 	color: black;
 }
@@ -52,7 +60,9 @@ li {
 .WARNING {
 	color: white;
 	background-color: red;
+	padding: 10px;
 }
+
 li > .checkbox {
 	display: inline-block;
 	width: 10px;
@@ -79,16 +89,4 @@ li.ERROR > .checkbox {
 .charcoal {
 	color: #fff;
 	background: #444;
-}
-
-.spinner {
-	width: 15px;
-	height: 15px;
-	position: fixed;
-	top: 0;
-	right: 0;
-	display: none;
-}
-.spinner.working {
-	display: block;
 }

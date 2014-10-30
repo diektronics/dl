@@ -60,7 +60,7 @@ func (d *Downloader) download(down *types.Download) {
 		l := <-ch
 		if l.Status != types.Success {
 			down.Status = l.Status
-			down.Error += fmt.Sprintln("download:", down.Name, l.URL, "failed to download")
+			down.Errors = append(down.Errors, fmt.Sprintf("download: %v failed to download", l.URL))
 		}
 		if err := d.db.Update(down); err != nil {
 			log.Println("download:", down.Name, "error updating:", err)
@@ -85,7 +85,7 @@ func (d *Downloader) download(down *types.Download) {
 		h, ok := hook.All()[hookName]
 		if !ok {
 			down.Status = types.Error
-			down.Error += fmt.Sprintln("download:", down.Name, hookName, "does not exist")
+			down.Errors = append(down.Errors, fmt.Sprintf("download: %v %v does not exist", down.Name, hookName))
 			break
 		}
 		log.Println("download:", down.Name, "about to run posthook", hookName)
@@ -95,7 +95,7 @@ func (d *Downloader) download(down *types.Download) {
 		err := <-data.Ch
 		if err != nil {
 			down.Status = types.Error
-			down.Error += fmt.Sprintln("download:", down.Name, h.Name(), "failed", err)
+			down.Errors = append(down.Errors, fmt.Sprintf("download: %v failed %v", h.Name(), err))
 			break
 		}
 		log.Println("download:", down.Name, h.Name(), "ran successfully")

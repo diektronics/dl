@@ -10,7 +10,7 @@ type Download struct {
 	ID         int64
 	Name       string
 	Status     Status
-	Error      string
+	Errors     []string
 	Posthook   string
 	CreatedAt  time.Time
 	ModifiedAt time.Time
@@ -41,6 +41,6 @@ func (d *Download) String() string {
 		links = append(links, fmt.Sprintf("\tID: %v\n\tURL: %v\n\tStatus: %v\n\tCreatedAt: %v\n\tModifiedAt: %v",
 			l.ID, l.URL, l.Status, l.CreatedAt, l.ModifiedAt))
 	}
-	return fmt.Sprintf("ID: %v\nName: %v\nStatus: %v\nError: %v\nPosthook: %v\nCreatedAt: %v\nModifiedAt: %v\nLinks: %v\n",
-		d.ID, d.Name, d.Status, d.Error, d.Posthook, d.CreatedAt, d.ModifiedAt, strings.Join(links, "\n"))
+	return fmt.Sprintf("ID: %v\nName: %v\nStatus: %v\nErrors: %v\nPosthook: %v\nCreatedAt: %v\nModifiedAt: %v\nLinks: %v\n",
+		d.ID, d.Name, d.Status, d.Errors, d.Posthook, d.CreatedAt, d.ModifiedAt, strings.Join(links, "\n"))
 }

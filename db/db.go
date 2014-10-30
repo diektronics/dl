@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"diektronics.com/carter/dl/cfg"
@@ -89,11 +90,17 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 
 	down := &types.Download{ID: id}
 	var status string
+	var errStr string
 	if err := db.QueryRow("SELECT name, status, error, posthook, created_at, modified_at FROM downloads WHERE id=?", id).Scan(
-		&down.Name, &status, &down.Error, &down.Posthook, &down.CreatedAt, &down.ModifiedAt); err != nil {
+		&down.Name, &status, &errStr, &down.Posthook, &down.CreatedAt, &down.ModifiedAt); err != nil {
 		return nil, err
 	}
 	down.Status = types.Status(status)
+	for _, e := range strings.Split(errStr, "\n") {
+		if len(e) > 0 {
+			down.Errors = append(down.Errors, e)
+		}
+	}
 
 	rows, err := db.Query("SELECT id, url, status, created_at, modified_at FROM links WHERE download_id=?", id)
 	if err != nil {
@@ -131,10 +138,16 @@ func (d *Db) GetAll() ([]*types.Download, error) {
 	defer rows.Close()
 	for rows.Next() {
 		down := &types.Download{}
-		if err := rows.Scan(&down.ID, &down.Name, &status, &down.Error, &down.Posthook, &down.CreatedAt, &down.ModifiedAt); err != nil {
+		var errStr string
+		if err := rows.Scan(&down.ID, &down.Name, &status, &errStr, &down.Posthook, &down.CreatedAt, &down.ModifiedAt); err != nil {
 			return nil, err
 		}
 		down.Status = types.Status(status)
+		for _, e := range strings.Split(errStr, "\n") {
+			if len(e) > 0 {
+				down.Errors = append(down.Errors, e)
+			}
+		}
 
 		rowsLinks, err := db.Query("SELECT id, url, status, created_at, modified_at FROM links WHERE download_id=?", down.ID)
 		if err != nil {
@@ -260,7 +273,7 @@ func updateDownload(tx *sql.Tx, down *types.Download) error {
 
 	now := time.Now()
 	res, err := tx.Exec("UPDATE downloads SET status=?, error=?, modified_at=? WHERE id=?",
-		string(down.Status), down.Error, now, down.ID)
+		string(down.Status), strings.Join(down.Errors, "\n"), now, down.ID)
 	if err != nil {
 		return err
 	}

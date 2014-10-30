@@ -2,9 +2,6 @@ TODO
 ====
 * Recovery mechanism: get everything in dB that is QUEUED and RUNNING
 * Use user certificates for multiuser support
-* AngularJS frontend.
-* Update links status.
-* Make a better DELETE button/link.
 
 DONE
 ====
@@ -21,7 +18,7 @@ DONE
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
     status varchar(10) NOT NULL DEFAULT "QUEUED",
-    error varchar(255) NOT NULL DEFAULT "",
+    error varchar(2048) NOT NULL DEFAULT "",
     posthook varchar(255) NOT NULL DEFAULT "",
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL,
@@ -55,3 +52,6 @@ DONE
 * We can create a channel/worker per download. As downloader.workers finish with their links, they send the result to that channel. The worker in there updates the types.Download until an error is received or all links have been downloaded. Then executes the posthooks (chan to workers again)
 * Use SSL by default
 * Refresh page with a timer.
+* AngularJS frontend.
+* Update links status.
+* Make a better DELETE button/link.
