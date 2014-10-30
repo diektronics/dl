@@ -18,7 +18,7 @@ DONE
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     name varchar(255) NOT NULL,
     status varchar(10) NOT NULL DEFAULT "QUEUED",
-    error varchar(2048) NOT NULL DEFAULT "",
+    error varchar(2048) NOT NULL DEFAULT "No errors",
     posthook varchar(255) NOT NULL DEFAULT "",
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL,
