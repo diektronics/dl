@@ -31,7 +31,7 @@
       <li ng-repeat="d in downs"> <span ng-click="toggleVisibility(d)" class="{{d.Status}}">{{moreOrLess(d)}} {{d.Name}}</span>
         <div ng-show="visible[d.ID]">
           <ul>
-            <li>Status: {{d.Status}}</li>
+            <li>Status: <span class="{{d.Status}}">{{d.Status}}</span></li>
             <li>Error: {{d.Error}}</li>
             <li>Hooks: {{d.Posthook}}</li>
             <li>Links</li>
