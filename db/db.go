@@ -2,7 +2,9 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"diektronics.com/carter/dl/cfg"
@@ -12,13 +14,18 @@ import (
 
 type Db struct {
 	connectionString string
+	q                chan interface{}
 }
 
 func New(c *cfg.Configuration) *Db {
-	return &Db{
+	d := &Db{
 		connectionString: fmt.Sprintf("%s:%s@%s/%s?charset=utf8&parseTime=true&loc=Local",
 			c.DbUser, c.DbPassword, c.DbServer, c.DbDatabase),
+		q: make(chan interface{}, 1000),
 	}
+	go d.worker(0)
+
+	return d
 }
 
 func (d *Db) Add(down *types.Download) error {
@@ -196,49 +203,91 @@ func (d *Db) Del(down *types.Download) error {
 	return nil
 }
 
+func (d *Db) Update(data interface{}) error {
+	// check data is of the supported types
+	switch data := data.(type) {
+	default:
+		return errors.New("Update: unexpected data")
+
+	case *types.Download, *types.Link:
+		d.q <- data
+	}
+
+	return nil
+}
+
 // FIXME(diek): even if there is no change, these updates will always change the data
 // because modified_at is set to time.Now().
-func (d *Db) Update(down *types.Download) error {
+func (d *Db) worker(i int) {
+	log.Println("db:", i, "ready for action")
+
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
-		return err
+		log.Println("db:", err)
+		return
 	}
 	defer db.Close()
 
-	tx, err := db.Begin()
-	if err != nil {
+	for data := range d.q {
+		tx, err := db.Begin()
+		if err != nil {
+			log.Println("db:", err)
+			continue
+		}
+		switch data := data.(type) {
+		case *types.Download:
+			if err := updateDownload(tx, data); err != nil {
+				tx.Rollback()
+				log.Println("db:", err)
+				continue
+			}
+		case *types.Link:
+			if err := updateLink(tx, []*types.Link{data}); err != nil {
+				tx.Rollback()
+				log.Println("db:", err)
+				continue
+			}
+		}
+
+		tx.Commit()
+	}
+}
+
+func updateDownload(tx *sql.Tx, down *types.Download) error {
+	if err := updateLink(tx, down.Links); err != nil {
 		return err
 	}
-	now := time.Now()
-	for _, l := range down.Links {
-		res, err := tx.Exec("UPDATE links SET status=?, modified_at=? WHERE id=?",
-			string(l.Status), now, l.ID)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		if n, err := res.RowsAffected(); err != nil {
-			tx.Rollback()
-			return err
-		} else if n == 1 {
-			l.ModifiedAt = now
 
-		}
-	}
+	now := time.Now()
 	res, err := tx.Exec("UPDATE downloads SET status=?, error=?, modified_at=? WHERE id=?",
 		string(down.Status), down.Error, now, down.ID)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	if n, err := res.RowsAffected(); err != nil {
-		tx.Rollback()
 		return err
 	} else if n == 1 {
 		down.ModifiedAt = now
 
 	}
 
-	tx.Commit()
+	return nil
+}
+
+func updateLink(tx *sql.Tx, links []*types.Link) error {
+	now := time.Now()
+	for _, l := range links {
+		res, err := tx.Exec("UPDATE links SET status=?, modified_at=? WHERE id=?",
+			string(l.Status), now, l.ID)
+		if err != nil {
+			return err
+		}
+		if n, err := res.RowsAffected(); err != nil {
+			return err
+		} else if n == 1 {
+			l.ModifiedAt = now
+		}
+	}
+
 	return nil
 }

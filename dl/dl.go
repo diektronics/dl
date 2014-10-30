@@ -113,11 +113,13 @@ func (d *Downloader) worker(i int) {
 	log.Println("download:", i, "ready for action")
 
 	for l := range d.q {
-		// TODO(diek): Update this in the dB... somehow.
 		l.l.Status = types.Running
+		if err := d.db.Update(l.l); err != nil {
+			log.Println("download: error updating:", err)
+		}
 
 		// TODO(diek): make this into a Downloader var, and get it from cfg.Configuration
-		destination := "/mnt/data/video/downs/" + l.dirName
+		destination := "/tmp/downs/" + l.dirName
 		if err := os.MkdirAll(destination, 0777); err != nil {
 			log.Println("download:", i, "err:", err)
 			log.Println("download:", i, "cannot create directory:", destination)
