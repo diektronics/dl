@@ -1,6 +1,5 @@
 TODO
 ====
-* Recovery mechanism: get everything in dB that is QUEUED and RUNNING
 * Use user certificates for multiuser support
 
 DONE
@@ -23,6 +22,7 @@ DONE
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL,
     PRIMARY KEY(id));
+  alter table downloads add index status (status);
 * links table:
   * ID
   * download_id
@@ -37,6 +37,7 @@ DONE
     modified_at DATETIME NOT NULL,
     PRIMARY KEY(id),
     FOREIGN KEY(download_id) REFERENCES downloads(id));
+  alter table links add index status (status);
 * REST interface with mysql backend
 * Run in some port, use apache proxy to show it in a particular URL diektronics.com/downloader
 * Link per line
@@ -55,3 +56,4 @@ DONE
 * AngularJS frontend.
 * Update links status.
 * Make a better DELETE button/link.
+* Recovery mechanism: get everything in dB that is QUEUED and RUNNING

@@ -37,6 +37,19 @@ func New(c *cfg.Configuration, nWorkers int) *Downloader {
 	return d
 }
 
+func (d *Downloader) Recovery() error {
+	downs, err := d.db.QueueRunning()
+	if err != nil {
+		return err
+	}
+
+	for _, down := range downs {
+		go d.download(down)
+	}
+
+	return nil
+}
+
 func (d *Downloader) Download(down *types.Download) error {
 	if err := d.db.Add(down); err != nil {
 		return err

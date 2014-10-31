@@ -73,7 +73,7 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 }
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
-	downs, err := s.d.Db().GetAll()
+	downs, err := s.d.Db().GetAll(nil)
 	if err != nil {
 		return err
 	}

@@ -35,6 +35,10 @@ const (
 	Error   Status = "ERROR"
 )
 
+func AllStatuses() []Status {
+	return []Status{Queued, Running, Success, Error}
+}
+
 func (d *Download) String() string {
 	links := []string{}
 	for _, l := range d.Links {

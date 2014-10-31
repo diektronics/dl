@@ -25,8 +25,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// TODO(diek): do recovery, all that is RUNNING becomes QUEUED, then all that is QUEUED goes to the queue.
-	server.New(dl.New(c, 5)).Run()
+	d := dl.New(c, 5)
+	if err := d.Recovery(); err != nil {
+		log.Fatal(err)
+	}
+	server.New(d).Run()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)

@@ -122,7 +122,7 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 	return down, nil
 }
 
-func (d *Db) GetAll() ([]*types.Download, error) {
+func (d *Db) GetAll(statuses []types.Status) ([]*types.Download, error) {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
 		return nil, err
@@ -131,7 +131,24 @@ func (d *Db) GetAll() ([]*types.Download, error) {
 
 	downs := []*types.Download{}
 	var status string
-	rows, err := db.Query("SELECT id, name, status, error, posthook, created_at, modified_at FROM downloads")
+	if statuses == nil || len(statuses) == 0 {
+		statuses = types.AllStatuses()
+	}
+	query := "SELECT id, name, status, error, posthook, created_at, modified_at FROM downloads WHERE status IN ("
+	vals := []interface{}{}
+	for _, s := range statuses {
+		query += "?,"
+		vals = append(vals, string(s))
+	}
+	query = query[0 : len(query)-1]
+	query += ")"
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := stmt.Query(vals...)
 	if err != nil {
 		return nil, err
 	}
@@ -227,6 +244,34 @@ func (d *Db) Update(data interface{}) error {
 	}
 
 	return nil
+}
+
+func (d *Db) QueueRunning() ([]*types.Download, error) {
+	db, err := sql.Open("mysql", d.connectionString)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	_, err = tx.Exec("UPDATE downloads SET status='QUEUED' where status='RUNNING'")
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	_, err = tx.Exec("UPDATE links SET status='QUEUED' where status='RUNNING'")
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	tx.Commit()
+
+	return d.GetAll([]types.Status{types.Queued})
 }
 
 // FIXME(diek): even if there is no change, these updates will always change the data
