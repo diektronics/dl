@@ -28,7 +28,7 @@ func New(c *cfg.Configuration) *Client {
 }
 
 func (n Client) Notify(down *types.Download) {
-	header := fmt.Sprintf("From: %s\nTo: %s\nSubject: %s\n\n",
+	header := fmt.Sprintf("From: %s\nTo: %s\nSubject: %s %v\n\n",
 		n.sender, n.recipient, down.Name, down.Status)
 	content := []byte(header + down.String())
 
