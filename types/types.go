@@ -46,5 +46,5 @@ func (d *Download) String() string {
 			l.ID, l.URL, l.Status, l.CreatedAt, l.ModifiedAt))
 	}
 	return fmt.Sprintf("ID: %v\nName: %v\nStatus: %v\nErrors: %v\nPosthook: %v\nCreatedAt: %v\nModifiedAt: %v\nLinks: %v\n",
-		d.ID, d.Name, d.Status, d.Errors, d.Posthook, d.CreatedAt, d.ModifiedAt, strings.Join(links, "\n"))
+		d.ID, d.Name, d.Status, strings.Join(d.Errors, "\n\t"), d.Posthook, d.CreatedAt, d.ModifiedAt, strings.Join(links, "\n"))
 }

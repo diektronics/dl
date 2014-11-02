@@ -10,13 +10,14 @@ import (
 	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/db"
 	"diektronics.com/carter/dl/hook"
+	"diektronics.com/carter/dl/notifier"
 	"diektronics.com/carter/dl/types"
 )
 
 type Downloader struct {
 	q  chan *link
 	db *db.Db
-	h  []*hook.Hook
+	n  *notifier.Client
 }
 
 type link struct {
@@ -29,6 +30,7 @@ func New(c *cfg.Configuration, nWorkers int) *Downloader {
 	d := &Downloader{
 		q:  make(chan *link, 1000),
 		db: db.New(c),
+		n:  notifier.New(c),
 	}
 	for i := 0; i < nWorkers; i++ {
 		go d.worker(i)
@@ -60,6 +62,7 @@ func (d *Downloader) Download(down *types.Download) error {
 }
 
 func (d *Downloader) download(down *types.Download) {
+	defer d.n.Notify(down)
 	down.Status = types.Running
 	if err := d.db.Update(down); err != nil {
 		log.Println("download:", down.Name, "error updating:", err)
