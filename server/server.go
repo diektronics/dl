@@ -100,8 +100,11 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 	}
 	links := []*types.Link{}
 	for _, url := range strings.Split(req.Links, "\n") {
-		l := &types.Link{URL: strings.TrimSpace(url)}
-		links = append(links, l)
+		url = strings.TrimSpace(url)
+		if len(url) > 0 {
+			l := &types.Link{URL: url}
+			links = append(links, l)
+		}
 	}
 	// FIXME(diek): UNRAR hook has to happen BEFORE REMOVE hook. sort inversely...
 	sort.Sort(sort.Reverse(sort.StringSlice(hooks)))
