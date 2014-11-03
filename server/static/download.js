@@ -5,9 +5,11 @@ angular.module('downApp', [])
     $scope.downHooks = {};
     $scope.working = false;
     $scope.visible = {};
+    $scope.retError = '';
 
     var logError = function(data, status) {
       console.log('code '+status+': '+data);
+      $scope.retError = data;
       $scope.working = false;
     };
 
@@ -33,6 +35,7 @@ angular.module('downApp', [])
             $scope.downName = '';
             $scope.downLinks = '';
             $scope.downHooks = {};
+            $scope.retError = ''
           })
         });
     };

@@ -13,6 +13,7 @@
 <body>
   <div class="container" ng-controller="DownCtrl">
     <h1 class="charcoal rounded-box">download</h1>
+    <h2 class="ERROR" ng-show="{{retError == ''}}">{{retError}}</h2>
     <form>
       <input type="text" class="rounded-box" placeholder="Name" ng-model="downName">
       <span ng-repeat="h in hooks">

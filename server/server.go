@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -105,6 +106,9 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 	// FIXME(diek): UNRAR hook has to happen BEFORE REMOVE hook. sort inversely...
 	sort.Sort(sort.Reverse(sort.StringSlice(hooks)))
 	down := &types.Download{Name: req.Name, Posthook: strings.Join(hooks, ","), Links: links}
+	if len(down.Name) == 0 || len(down.Links) == 0 {
+		return badRequest{errors.New("please provide a name and links to download")}
+	}
 	if err := s.d.Download(down); err != nil {
 		return err
 	}

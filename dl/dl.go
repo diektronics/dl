@@ -1,7 +1,6 @@
 package dl
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -54,9 +53,6 @@ func (d *Downloader) Recovery() error {
 }
 
 func (d *Downloader) Download(down *types.Download) error {
-	if len(down.Name) == 0 || len(down.Links) == 0 {
-		return errors.New("lease provide a name and links to download")
-	}
 	if err := d.db.Add(down); err != nil {
 		return err
 	}
