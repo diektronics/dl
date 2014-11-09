@@ -75,6 +75,10 @@ li.ERROR > .checkbox {
 	background: #888;	
 }
 
+textarea {
+	width: 100%;
+}
+
 .rounded-box {
 	padding: 10px;
 	border-radius: 4px;
