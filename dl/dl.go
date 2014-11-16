@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"diektronics.com/carter/dl/cfg"
@@ -33,7 +34,7 @@ func New(c *cfg.Configuration, nWorkers int) *Downloader {
 		n:  notifier.New(c),
 	}
 	for i := 0; i < nWorkers; i++ {
-		go d.worker(i)
+		go d.worker(i, c)
 	}
 
 	return d
@@ -125,7 +126,7 @@ func (d *Downloader) download(down *types.Download) {
 	log.Println("download:", down.Name, "all done, going away")
 }
 
-func (d *Downloader) worker(i int) {
+func (d *Downloader) worker(i int, c *cfg.Configuration) {
 	log.Println("download:", i, "ready for action")
 
 	for l := range d.q {
@@ -135,7 +136,7 @@ func (d *Downloader) worker(i int) {
 		}
 
 		// TODO(diek): make this into a Downloader var, and get it from cfg.Configuration
-		destination := "/mnt/data/video/downs/" + l.dirName
+		destination := filepath.Join(c.DownloadDir, l.dirName)
 		if err := os.MkdirAll(destination, 0777); err != nil {
 			log.Println("download:", i, "err:", err)
 			log.Println("download:", i, "cannot create directory:", destination)
@@ -144,7 +145,7 @@ func (d *Downloader) worker(i int) {
 			continue
 		}
 		log.Printf("download: %d getting %q into %q\n", i, l.l.URL, destination)
-		cmd := []string{"/home/carter/bin/plowdown",
+		cmd := []string{c.PlowdownPath,
 			"--engine=xfilesharing",
 			"--output-directory=" + destination,
 			"--printf=%F",
