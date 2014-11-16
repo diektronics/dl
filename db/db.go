@@ -20,7 +20,7 @@ type Db struct {
 
 func New(c *cfg.Configuration) *Db {
 	d := &Db{
-		connectionString: fmt.Sprintf("%s:%s@%s/%s?charset=utf8&parseTime=true&loc=Local",
+		connectionString: fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local",
 			c.DbUser, c.DbPassword, c.DbServer, c.DbDatabase),
 		q: make(chan interface{}, 1000),
 	}
