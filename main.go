@@ -29,7 +29,7 @@ func main() {
 	if err := d.Recovery(); err != nil {
 		log.Fatal(err)
 	}
-	server.New(d).Run()
+	server.New(d, c).Run()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)

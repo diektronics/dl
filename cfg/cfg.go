@@ -21,6 +21,7 @@ type Configuration struct {
 	MailPassword  string
 	DownloadDir   string
 	PlowdownPath  string
+	ListenPort    int
 }
 
 func GetConfig(cfgFile string) (*Configuration, error) {
@@ -47,7 +48,7 @@ func validate(c *Configuration) error {
 	cv := reflect.ValueOf(*c)
 	ct := reflect.TypeOf(*c)
 	for i := 0; i < cv.NumField(); i++ {
-		if len(cv.Field(i).String()) == 0 {
+		if ct.Field(i).Type.Kind() == reflect.String && len(cv.Field(i).String()) == 0 {
 			allErrors = append(allErrors, fmt.Sprintf("%q cannot be empty", ct.Field(i).Name))
 		}
 	}

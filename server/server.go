@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/dl"
 	"diektronics.com/carter/dl/hook"
 	"diektronics.com/carter/dl/types"
@@ -20,11 +21,12 @@ const DownPrefix = "/down"
 const HookPrefix = "/hook"
 
 type Server struct {
-	d *dl.Downloader
+	d    *dl.Downloader
+	port int
 }
 
-func New(d *dl.Downloader) *Server {
-	return &Server{d: d}
+func New(d *dl.Downloader, c *cfg.Configuration) *Server {
+	return &Server{d: d, port: c.ListenPort}
 }
 
 func (s *Server) Run() {
@@ -43,7 +45,7 @@ func (s *Server) Run() {
 
 	http.Handle("/", r)
 	// 2. Run server
-	go http.ListenAndServe(":4444", nil)
+	go http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
 }
 
 // badRequest is handled by setting the status code in the reply to StatusBadRequest.
