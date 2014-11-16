@@ -48,7 +48,7 @@ func validate(c *Configuration) error {
 	cv := reflect.ValueOf(*c)
 	ct := reflect.TypeOf(*c)
 	for i := 0; i < cv.NumField(); i++ {
-		if ct.Field(i).Type.Kind() == reflect.String && len(cv.Field(i).String()) == 0 {
+		if cv.Field(i).Kind() == reflect.String && len(cv.Field(i).String()) == 0 {
 			allErrors = append(allErrors, fmt.Sprintf("%q cannot be empty", ct.Field(i).Name))
 		}
 	}

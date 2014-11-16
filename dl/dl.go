@@ -135,7 +135,6 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 			log.Println("download: error updating:", err)
 		}
 
-		// TODO(diek): make this into a Downloader var, and get it from cfg.Configuration
 		destination := filepath.Join(c.DownloadDir, l.dirName)
 		if err := os.MkdirAll(destination, 0777); err != nil {
 			log.Println("download:", i, "err:", err)
