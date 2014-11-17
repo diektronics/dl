@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
 	"diektronics.com/carter/dl/cfg"
@@ -14,7 +15,7 @@ import (
 
 var cfgFile = flag.String(
 	"cfg",
-	os.Getenv("HOME")+"/.config/dl/config.json",
+	filepath.Join(os.Getenv("HOME"), ".config", "dl", "config.json"),
 	"Configuration file in JSON format indicating DB credentials and mailing details.",
 )
 

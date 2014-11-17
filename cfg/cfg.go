@@ -36,7 +36,7 @@ func GetConfig(cfgFile string) (*Configuration, error) {
 	}
 
 	if err := validate(c); err != nil {
-		return nil, fmt.Errorf("Invalid configuration file: %v", err)
+		return nil, fmt.Errorf("GetConfig: Invalid configuration file: %v", err)
 	}
 
 	return c, nil
@@ -60,7 +60,7 @@ func validate(c *Configuration) error {
 	}
 
 	if len(allErrors) != 0 {
-		return errors.New(strings.Join(allErrors, ","))
+		return errors.New(strings.Join(allErrors, ", "))
 	}
 
 	return nil
