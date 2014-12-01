@@ -186,5 +186,6 @@ func (d *Downloader) Del(down *types.Download, _ *string) error {
 func (d *Downloader) HookNames(_ string, reply *types.HookReply) error {
 	log.Println("hook.Names():", hook.Names())
 	copy(*reply, hook.Names())
+	log.Println("*reply:", *reply)
 	return nil
 }
