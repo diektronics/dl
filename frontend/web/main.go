@@ -2,9 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"net/rpc"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -27,11 +25,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	d, err := rpc.DialHTTP("tcp", fmt.Sprintf("localhost:%v", c.BackendPort))
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	server.New(d, c).Run()
+	server.New(c).Run()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)

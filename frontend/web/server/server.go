@@ -23,12 +23,12 @@ const (
 )
 
 type Server struct {
-	d    *rpc.Client
-	port int
+	port    int
+	backend string
 }
 
 func New(d *rpc.Client, c *cfg.Configuration) *Server {
-	return &Server{d: d, port: c.HTTPPort}
+	return &Server{port: c.HTTPPort, backlend: fmt.Sprintf("localhost:%v", c.BackendPort)}
 }
 
 func (s *Server) Run() {
@@ -78,8 +78,13 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 }
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
+	client, err := rpc.DialHTTP("tcp", s.backend)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer client.Close()
 	var downs types.GetAllReply
-	if err := s.d.Call("Download.GetAll", []types.Status{}, &downs); err != nil {
+	if err := client.Call("Download.GetAll", []types.Status{}, &downs); err != nil {
 		return err
 	}
 	res := struct{ Downs []*types.Download }{downs}
@@ -116,7 +121,12 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 	if len(down.Name) == 0 || len(down.Links) == 0 {
 		return badRequest{errors.New("please provide a name and links to download")}
 	}
-	if err := s.d.Call("Download.Download", down, nil); err != nil {
+	client, err := rpc.DialHTTP("tcp", s.backend)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer client.Close()
+	if err := client.Call("Download.Download", down, nil); err != nil {
 		return err
 	}
 
@@ -128,8 +138,13 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
+	client, err := rpc.DialHTTP("tcp", s.backend)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer client.Close()
 	var down types.Download
-	if err := s.d.Call("Download.Get", id, &down); err != nil {
+	if err := client.Call("Download.Get", id, &down); err != nil {
 		return notFound{}
 	}
 	return json.NewEncoder(w).Encode(&down)
@@ -140,11 +155,16 @@ func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
+	client, err := rpc.DialHTTP("tcp", s.backend)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer client.Close()
 	var down types.Download
-	if err := s.d.Call("Download.Get", id, &down); err != nil {
+	if err := client.Call("Download.Get", id, &down); err != nil {
 		return notFound{}
 	}
-	if err := s.d.Call("Download.Del", &down, nil); err != nil {
+	if err := client.Call("Download.Del", &down, nil); err != nil {
 		return notFound{}
 	}
 	return nil
@@ -159,8 +179,13 @@ func parseID(r *http.Request) (int64, error) {
 }
 
 func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
+	client, err := rpc.DialHTTP("tcp", s.backend)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer client.Close()
 	var reply types.HookReply
-	s.d.Call("Download.HookNames", nil, &reply)
+	client.Call("Download.HookNames", nil, &reply)
 	res := struct{ Hooks []string }{reply}
 	return json.NewEncoder(w).Encode(res)
 }
