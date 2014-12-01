@@ -51,5 +51,10 @@ func (d *Download) String() string {
 
 // RPC types
 
-type HookReply []string
-type GetAllReply []*Download
+type HookReply struct {
+	Names []string
+}
+
+type GetAllReply struct {
+	Downs []*Download
+}

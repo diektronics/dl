@@ -166,11 +166,11 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 }
 
 func (d *Downloader) GetAll(statuses []types.Status, reply *types.GetAllReply) error {
-	downs, err := d.db.GetAll(statuses)
+	var err error
+	reply.Downs, err = d.db.GetAll(statuses)
 	if err != nil {
 		return err
 	}
-	copy(*reply, downs)
 	return nil
 }
 
@@ -184,8 +184,6 @@ func (d *Downloader) Del(down *types.Download, _ *string) error {
 }
 
 func (d *Downloader) HookNames(_ string, reply *types.HookReply) error {
-	log.Println("hook.Names():", hook.Names())
-	copy(*reply, hook.Names())
-	log.Println("*reply:", *reply)
+	reply.Names = hook.Names()
 	return nil
 }

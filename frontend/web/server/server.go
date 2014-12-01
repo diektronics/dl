@@ -86,11 +86,11 @@ func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
 		log.Fatal("dialing:", err)
 	}
 	defer client.Close()
-	var downs types.GetAllReply
-	if err := client.Call("Downloader.GetAll", []types.Status{}, &downs); err != nil {
+	var reply types.GetAllReply
+	if err := client.Call("Downloader.GetAll", []types.Status{}, &reply); err != nil {
 		return err
 	}
-	res := struct{ Downs []*types.Download }{downs}
+	res := struct{ Downs []*types.Download }{reply.Downs}
 	return json.NewEncoder(w).Encode(res)
 }
 
@@ -189,6 +189,6 @@ func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
 	defer client.Close()
 	var reply types.HookReply
 	client.Call("Downloader.HookNames", "", &reply)
-	res := struct{ Hooks []string }{reply}
+	res := struct{ Hooks []string }{reply.Names}
 	return json.NewEncoder(w).Encode(res)
 }
