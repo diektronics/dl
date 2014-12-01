@@ -33,7 +33,9 @@ func main() {
 	if err := d.Recovery(); err != nil {
 		log.Fatal(err)
 	}
-	rpc.Register(d)
+	if err := rpc.Register(d); err != nil {
+		log.Fatal("registering:", err)
+	}
 	rpc.HandleHTTP()
 	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", c.BackendPort))
 	if err != nil {
