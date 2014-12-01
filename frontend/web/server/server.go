@@ -16,8 +16,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const DownPrefix = "/down"
-const HookPrefix = "/hook"
+const (
+	downPrefix    = "/down"
+	hookPrefix    = "/hook"
+	staticContent = "src/diektronics.com/carter/dl/frontend/web/server/static"
+)
 
 type Server struct {
 	d    *rpc.Client
@@ -31,16 +34,16 @@ func New(d *rpc.Client, c *cfg.Configuration) *Server {
 func (s *Server) Run() {
 	// 1. Register paths
 	r := mux.NewRouter()
-	s1 := r.PathPrefix(DownPrefix).Subrouter()
+	s1 := r.PathPrefix(downPrefix).Subrouter()
 	s1.HandleFunc("/", errorHandler(s.listDowns)).Methods("GET")
 	s1.HandleFunc("/", errorHandler(s.newDown)).Methods("POST")
 	s1.HandleFunc("/{id}", errorHandler(s.getDown)).Methods("GET")
 	s1.HandleFunc("/{id}", errorHandler(s.letDown)).Methods("DELETE")
 
-	s2 := r.PathPrefix(HookPrefix).Subrouter()
+	s2 := r.PathPrefix(hookPrefix).Subrouter()
 	s2.HandleFunc("/", errorHandler(s.listHooks)).Methods("GET")
 
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("src/diektronics.com/carter/dl/server/static"))))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(staticContent))))
 
 	http.Handle("/", r)
 	// 2. Run server
