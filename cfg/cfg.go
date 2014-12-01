@@ -21,7 +21,8 @@ type Configuration struct {
 	MailPassword  string
 	DownloadDir   string
 	PlowdownPath  string
-	ListenPort    int
+	HTTPPort      int
+	BackendPort   int
 }
 
 func GetConfig(cfgFile string) (*Configuration, error) {

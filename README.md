@@ -1,9 +1,26 @@
+========
+| v2.0 |
+========
+* Merge with tvd
+* Make downloader into a backend
+* Two different frontends:
+  * web for:
+    * manual downloads
+    * visualization
+  * XML scrapper for automatic TV Shows download
+
 TODO
 ====
 * Use user certificates for multiuser support
+* Make dl into a backend with an RPC API.
+  * GetAll
+  * Download
+  * Get
+  * Del
+  * HookNames
 
-DONE
-====
+DONE v1.0
+=========
 * Each download may have several links
 * 4 statuses: QUEUED, RUNNING, SUCCESS, ERROR (and a error explanation in another field)
 * downloads table:

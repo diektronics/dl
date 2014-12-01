@@ -48,3 +48,8 @@ func (d *Download) String() string {
 	return fmt.Sprintf("ID: %v\nName: %v\nStatus: %v\nErrors: %v\nPosthook: %v\nCreatedAt: %v\nModifiedAt: %v\nLinks: %v\n",
 		d.ID, d.Name, d.Status, strings.Join(d.Errors, "\n\t"), d.Posthook, d.CreatedAt, d.ModifiedAt, strings.Join(links, "\n"))
 }
+
+// RPC types
+
+type HookReply []string
+type GetAllReply []*Download

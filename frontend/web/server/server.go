@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/rpc"
 	"sort"
 	"strconv"
 	"strings"
 
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/dl"
-	"diektronics.com/carter/dl/hook"
 	"diektronics.com/carter/dl/types"
 	"github.com/gorilla/mux"
 )
@@ -21,12 +20,12 @@ const DownPrefix = "/down"
 const HookPrefix = "/hook"
 
 type Server struct {
-	d    *dl.Downloader
+	d    *rpc.Client
 	port int
 }
 
-func New(d *dl.Downloader, c *cfg.Configuration) *Server {
-	return &Server{d: d, port: c.ListenPort}
+func New(d *rpc.Client, c *cfg.Configuration) *Server {
+	return &Server{d: d, port: c.HTTPPort}
 }
 
 func (s *Server) Run() {
@@ -76,8 +75,8 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 }
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
-	downs, err := s.d.Db().GetAll(nil)
-	if err != nil {
+	var downs types.GetAllReply
+	if err := s.d.Call("Download.GetAll", nil, &downs); err != nil {
 		return err
 	}
 	res := struct{ Downs []*types.Download }{downs}
@@ -114,7 +113,7 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 	if len(down.Name) == 0 || len(down.Links) == 0 {
 		return badRequest{errors.New("please provide a name and links to download")}
 	}
-	if err := s.d.Download(down); err != nil {
+	if err := s.d.Call("Download.Download", down, nil); err != nil {
 		return err
 	}
 
@@ -126,11 +125,11 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
-	down, err := s.d.Db().Get(id)
-	if err != nil {
+	var down types.Download
+	if err := s.d.Call("Download.Get", id, &down); err != nil {
 		return notFound{}
 	}
-	return json.NewEncoder(w).Encode(down)
+	return json.NewEncoder(w).Encode(&down)
 }
 
 func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
@@ -138,11 +137,11 @@ func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
-	down, err := s.d.Db().Get(id)
-	if err != nil {
+	var down types.Download
+	if err := s.d.Call("Download.Get", id, &down); err != nil {
 		return notFound{}
 	}
-	if err := s.d.Db().Del(down); err != nil {
+	if err := s.d.Call("Download.Del", &down, nil); err != nil {
 		return notFound{}
 	}
 	return nil
@@ -157,6 +156,8 @@ func parseID(r *http.Request) (int64, error) {
 }
 
 func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
-	res := struct{ Hooks []string }{hook.Names()}
+	var reply types.HookReply
+	s.d.Call("Download.HookNames", nil, &reply)
+	res := struct{ Hooks []string }{reply}
 	return json.NewEncoder(w).Encode(res)
 }

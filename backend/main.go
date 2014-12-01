@@ -2,15 +2,18 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net"
+	"net/http"
+	"net/rpc"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"time"
 
+	"diektronics.com/carter/dl/backend/dl"
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/dl"
-	"diektronics.com/carter/dl/server"
 )
 
 var cfgFile = flag.String(
@@ -30,7 +33,13 @@ func main() {
 	if err := d.Recovery(); err != nil {
 		log.Fatal(err)
 	}
-	server.New(d, c).Run()
+	rpc.Register(d)
+	rpc.HandleHTTP()
+	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", c.BackendPort))
+	if err != nil {
+		log.Fatal("listening:", err)
+	}
+	go http.Serve(l, nil)
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)

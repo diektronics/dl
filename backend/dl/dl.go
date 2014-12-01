@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"diektronics.com/carter/dl/backend/db"
+	"diektronics.com/carter/dl/backend/hook"
+	"diektronics.com/carter/dl/backend/notifier"
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/db"
-	"diektronics.com/carter/dl/hook"
-	"diektronics.com/carter/dl/notifier"
 	"diektronics.com/carter/dl/types"
 )
 
@@ -53,7 +53,7 @@ func (d *Downloader) Recovery() error {
 	return nil
 }
 
-func (d *Downloader) Download(down *types.Download) error {
+func (d *Downloader) Download(down *types.Download, _ *string) error {
 	if err := d.db.Add(down); err != nil {
 		return err
 	}
@@ -165,4 +165,25 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 	}
 }
 
-func (d *Downloader) Db() *db.Db { return d.db }
+func (d *Downloader) GetAll(statuses []types.Status, reply *types.GetAllReply) error {
+	downs, err := d.db.GetAll(statuses)
+	if err != nil {
+		return err
+	}
+	copy(*reply, downs)
+	return nil
+}
+
+func (d *Downloader) Get(id int64, down *types.Download) error {
+	down, err := d.db.Get(id)
+	return err
+}
+
+func (d *Downloader) Del(down *types.Download, _ *string) error {
+	return d.db.Del(down)
+}
+
+func (d *Downloader) HookNames(string, reply *types.HookReply) error {
+	copy(*reply, hook.Names())
+	return nil
+}
