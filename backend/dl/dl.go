@@ -183,7 +183,7 @@ func (d *Downloader) Del(down *types.Download, _ *string) error {
 	return d.db.Del(down)
 }
 
-func (d *Downloader) HookNames(string, reply *types.HookReply) error {
+func (d *Downloader) HookNames(_ *string, reply *types.HookReply) error {
 	copy(*reply, hook.Names())
 	return nil
 }
