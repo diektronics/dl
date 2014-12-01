@@ -172,9 +172,10 @@ func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
 		log.Println("can't find", id)
 		return notFound{}
 	}
+	log.Println("down:", down)
 	if err := client.Call("Downloader.Del", &down, nil); err != nil {
 		log.Println("can't delete", down)
-		return notFound{}
+		return err
 	}
 	return nil
 }
