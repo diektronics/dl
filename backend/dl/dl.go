@@ -175,7 +175,8 @@ func (d *Downloader) GetAll(statuses []types.Status, reply *types.GetAllReply) e
 }
 
 func (d *Downloader) Get(id int64, down *types.Download) error {
-	down, err := d.db.Get(id)
+	ret, err := d.db.Get(id)
+	*down = *ret
 	return err
 }
 

@@ -149,11 +149,11 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	defer client.Close()
-	var down *types.Download
-	if err := client.Call("Downloader.Get", id, down); err != nil {
+	var down types.Download
+	if err := client.Call("Downloader.Get", id, &down); err != nil {
 		return notFound{}
 	}
-	return json.NewEncoder(w).Encode(down)
+	return json.NewEncoder(w).Encode(&down)
 }
 
 func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
