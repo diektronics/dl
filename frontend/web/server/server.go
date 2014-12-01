@@ -79,7 +79,7 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
 	var downs types.GetAllReply
-	if err := s.d.Call("Download.GetAll", nil, &downs); err != nil {
+	if err := s.d.Call("Download.GetAll", []types.Status{}, &downs); err != nil {
 		return err
 	}
 	res := struct{ Downs []*types.Download }{downs}
