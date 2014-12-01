@@ -188,7 +188,7 @@ func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
 	}
 	defer client.Close()
 	var reply types.HookReply
-	client.Call("Download.HookNames", nil, &reply)
+	client.Call("Download.HookNames", "", &reply)
 	res := struct{ Hooks []string }{reply}
 	return json.NewEncoder(w).Encode(res)
 }
