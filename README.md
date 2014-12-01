@@ -12,12 +12,19 @@
 TODO
 ====
 * Use user certificates for multiuser support
+* Add destination to Download
+* Run Downloader.recovery() in New()
+* Create RENAME hook
+
+DONE
+====
 * Make dl into a backend with an RPC API.
   * GetAll
   * Download
   * Get
   * Del
   * HookNames
+
 
 DONE v1.0
 =========
