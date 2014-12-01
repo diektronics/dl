@@ -87,7 +87,7 @@ func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
 	}
 	defer client.Close()
 	var downs types.GetAllReply
-	if err := client.Call("Download.GetAll", []types.Status{}, &downs); err != nil {
+	if err := client.Call("Downloader.GetAll", []types.Status{}, &downs); err != nil {
 		return err
 	}
 	res := struct{ Downs []*types.Download }{downs}
@@ -129,7 +129,7 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 		log.Fatal("dialing:", err)
 	}
 	defer client.Close()
-	if err := client.Call("Download.Download", down, nil); err != nil {
+	if err := client.Call("Downloader.Download", down, nil); err != nil {
 		return err
 	}
 
@@ -147,7 +147,7 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 	}
 	defer client.Close()
 	var down types.Download
-	if err := client.Call("Download.Get", id, &down); err != nil {
+	if err := client.Call("Downloader.Get", id, &down); err != nil {
 		return notFound{}
 	}
 	return json.NewEncoder(w).Encode(&down)
@@ -164,10 +164,10 @@ func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
 	}
 	defer client.Close()
 	var down types.Download
-	if err := client.Call("Download.Get", id, &down); err != nil {
+	if err := client.Call("Downloader.Get", id, &down); err != nil {
 		return notFound{}
 	}
-	if err := client.Call("Download.Del", &down, nil); err != nil {
+	if err := client.Call("Downloader.Del", &down, nil); err != nil {
 		return notFound{}
 	}
 	return nil
@@ -188,7 +188,7 @@ func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
 	}
 	defer client.Close()
 	var reply types.HookReply
-	client.Call("Download.HookNames", "", &reply)
+	client.Call("Downloader.HookNames", "", &reply)
 	res := struct{ Hooks []string }{reply}
 	return json.NewEncoder(w).Encode(res)
 }
