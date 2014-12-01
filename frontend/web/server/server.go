@@ -28,7 +28,7 @@ type Server struct {
 }
 
 func New(d *rpc.Client, c *cfg.Configuration) *Server {
-	return &Server{port: c.HTTPPort, backlend: fmt.Sprintf("localhost:%v", c.BackendPort)}
+	return &Server{port: c.HTTPPort, backend: fmt.Sprintf("localhost:%v", c.BackendPort)}
 }
 
 func (s *Server) Run() {
