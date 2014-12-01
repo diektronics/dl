@@ -83,7 +83,8 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
 	client, err := rpc.DialHTTP("tcp", s.backend)
 	if err != nil {
-		log.Fatal("dialing:", err)
+		log.Println("dialing:", err)
+		return err
 	}
 	defer client.Close()
 	var reply types.GetAllReply
@@ -126,7 +127,8 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 	}
 	client, err := rpc.DialHTTP("tcp", s.backend)
 	if err != nil {
-		log.Fatal("dialing:", err)
+		log.Println("dialing:", err)
+		return err
 	}
 	defer client.Close()
 	if err := client.Call("Downloader.Download", down, nil); err != nil {
@@ -143,7 +145,8 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 	}
 	client, err := rpc.DialHTTP("tcp", s.backend)
 	if err != nil {
-		log.Fatal("dialing:", err)
+		log.Println("dialing:", err)
+		return err
 	}
 	defer client.Close()
 	var down types.Download
@@ -160,14 +163,17 @@ func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
 	}
 	client, err := rpc.DialHTTP("tcp", s.backend)
 	if err != nil {
-		log.Fatal("dialing:", err)
+		log.Println("dialing:", err)
+		return err
 	}
 	defer client.Close()
 	var down types.Download
 	if err := client.Call("Downloader.Get", id, &down); err != nil {
+		log.Println("can't find", id)
 		return notFound{}
 	}
 	if err := client.Call("Downloader.Del", &down, nil); err != nil {
+		log.Println("can't delete", down)
 		return notFound{}
 	}
 	return nil
@@ -184,7 +190,8 @@ func parseID(r *http.Request) (int64, error) {
 func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
 	client, err := rpc.DialHTTP("tcp", s.backend)
 	if err != nil {
-		log.Fatal("dialing:", err)
+		log.Println("dialing:", err)
+		return err
 	}
 	defer client.Close()
 	var reply types.HookReply
