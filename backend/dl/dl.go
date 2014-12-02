@@ -16,31 +16,37 @@ import (
 )
 
 type Downloader struct {
-	q  chan *link
-	db *db.Db
-	n  *notifier.Client
+	q          chan *link
+	db         *db.Db
+	n          *notifier.Client
+	defaultDir string
 }
 
 type link struct {
-	l       *types.Link
-	dirName string
-	ch      chan *types.Link
+	l           *types.Link
+	destination string
+	ch          chan *types.Link
 }
 
 func New(c *cfg.Configuration, nWorkers int) *Downloader {
 	d := &Downloader{
-		q:  make(chan *link, 1000),
-		db: db.New(c),
-		n:  notifier.New(c),
+		q:          make(chan *link, 1000),
+		db:         db.New(c),
+		n:          notifier.New(c),
+		defaultDir: c.DownloadDir,
 	}
 	for i := 0; i < nWorkers; i++ {
 		go d.worker(i, c)
 	}
 
+	if err := d.recovery(); err != nil {
+		log.Fatal("recovery:", err)
+	}
+
 	return d
 }
 
-func (d *Downloader) Recovery() error {
+func (d *Downloader) recovery() error {
 	downs, err := d.db.QueueRunning()
 	if err != nil {
 		return err
@@ -54,6 +60,9 @@ func (d *Downloader) Recovery() error {
 }
 
 func (d *Downloader) Download(down *types.Download, _ *string) error {
+	if len(down.Destination) == 0 {
+		down.Destination = filepath.Join(d.defaultDir, down.Name)
+	}
 	if err := d.db.Add(down); err != nil {
 		return err
 	}
@@ -70,7 +79,7 @@ func (d *Downloader) download(down *types.Download) {
 	}
 	ch := make(chan *types.Link, len(down.Links))
 	for _, l := range down.Links {
-		d.q <- &link{l, down.Name, ch}
+		d.q <- &link{l, down.Destination, ch}
 	}
 
 	for i := 0; i < len(down.Links); i++ {
@@ -107,7 +116,7 @@ func (d *Downloader) download(down *types.Download) {
 		}
 		log.Println("download:", down.Name, "about to run posthook", hookName)
 		ch := make(chan error)
-		data := &hook.Data{files, ch}
+		data := &hook.Data{files, ch, down.Name}
 		h.Channel() <- data
 		err := <-data.Ch
 		if err != nil {
@@ -135,18 +144,17 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 			log.Println("download: error updating:", err)
 		}
 
-		destination := filepath.Join(c.DownloadDir, l.dirName)
-		if err := os.MkdirAll(destination, 0777); err != nil {
+		if err := os.MkdirAll(l.destination, 0777); err != nil {
 			log.Println("download:", i, "err:", err)
-			log.Println("download:", i, "cannot create directory:", destination)
+			log.Println("download:", i, "cannot create directory:", l.destination)
 			l.l.Status = types.Error
 			l.ch <- l.l
 			continue
 		}
-		log.Printf("download: %d getting %q into %q\n", i, l.l.URL, destination)
+		log.Printf("download: %d getting %q into %q\n", i, l.l.URL, l.destination)
 		cmd := []string{c.PlowdownPath,
 			"--engine=xfilesharing",
-			"--output-directory=" + destination,
+			"--output-directory=" + l.destination,
 			"--printf=%F",
 			"--temp-rename",
 			l.l.URL}

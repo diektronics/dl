@@ -41,8 +41,8 @@ func (d *Db) Add(down *types.Download) error {
 	if err != nil {
 		return err
 	}
-	res, err := tx.Exec("INSERT INTO downloads (name, posthook, created_at, modified_at) VALUES (?, ?, ?, ?)",
-		down.Name, down.Posthook, now, now)
+	res, err := tx.Exec("INSERT INTO downloads (name, posthook, destination, created_at, modified_at) VALUES (?, ?, ?, ?, ?)",
+		down.Name, down.Posthook, down.Destination, now, now)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -91,8 +91,8 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 	down := &types.Download{ID: id}
 	var status string
 	var errStr string
-	if err := db.QueryRow("SELECT name, status, error, posthook, created_at, modified_at FROM downloads WHERE id=?", id).Scan(
-		&down.Name, &status, &errStr, &down.Posthook, &down.CreatedAt, &down.ModifiedAt); err != nil {
+	if err := db.QueryRow("SELECT name, status, error, posthook, destination, created_at, modified_at FROM downloads WHERE id=?", id).Scan(
+		&down.Name, &status, &errStr, &down.Posthook, &down.Destination, &down.CreatedAt, &down.ModifiedAt); err != nil {
 		return nil, err
 	}
 	down.Status = types.Status(status)
@@ -134,7 +134,7 @@ func (d *Db) GetAll(statuses []types.Status) ([]*types.Download, error) {
 	if statuses == nil || len(statuses) == 0 {
 		statuses = types.AllStatuses()
 	}
-	query := "SELECT id, name, status, error, posthook, created_at, modified_at FROM downloads WHERE status IN ("
+	query := "SELECT id, name, status, error, posthook, destination, created_at, modified_at FROM downloads WHERE status IN ("
 	vals := []interface{}{}
 	for _, s := range statuses {
 		query += "?,"
@@ -156,7 +156,7 @@ func (d *Db) GetAll(statuses []types.Status) ([]*types.Download, error) {
 	for rows.Next() {
 		down := &types.Download{}
 		var errStr string
-		if err := rows.Scan(&down.ID, &down.Name, &status, &errStr, &down.Posthook, &down.CreatedAt, &down.ModifiedAt); err != nil {
+		if err := rows.Scan(&down.ID, &down.Name, &status, &errStr, &down.Posthook, &down.Destination, &down.CreatedAt, &down.ModifiedAt); err != nil {
 			return nil, err
 		}
 		down.Status = types.Status(status)

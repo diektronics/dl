@@ -6,8 +6,9 @@ type Hook struct {
 }
 
 type Data struct {
-	Files []string
-	Ch    chan error
+	Files   []string
+	Ch      chan error
+	NewName string
 }
 
 var all map[string]*Hook

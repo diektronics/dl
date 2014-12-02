@@ -7,7 +7,7 @@ import (
 
 func init() {
 	// removing files is going to be pretty fast,
-	// no need to have many iddle threads.
+	// no need to have many idle threads.
 	all["REMOVE"] = New("REMOVE", remove, 1)
 	names = append(names, "REMOVE")
 }

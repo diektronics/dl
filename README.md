@@ -12,9 +12,7 @@
 TODO
 ====
 * Use user certificates for multiuser support
-* Add destination to Download
-* Run Downloader.recovery() in New()
-* Create RENAME hook
+* Make tvd into a frontend
 
 DONE
 ====
@@ -24,6 +22,9 @@ DONE
   * Get
   * Del
   * HookNames
+* Run Downloader.recovery() in New()
+* Add destination to Download
+* Create RENAME hook
 
 
 DONE v1.0
@@ -43,6 +44,7 @@ DONE v1.0
     status varchar(10) NOT NULL DEFAULT "QUEUED",
     error varchar(2048) NOT NULL DEFAULT "No errors",
     posthook varchar(255) NOT NULL DEFAULT "",
+    destination varchar(1024) NOT NULL DEFAULT "",
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL,
     PRIMARY KEY(id));

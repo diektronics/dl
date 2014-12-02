@@ -30,9 +30,6 @@ func main() {
 	}
 
 	d := dl.New(c, 5)
-	if err := d.Recovery(); err != nil {
-		log.Fatal(err)
-	}
 	if err := rpc.Register(d); err != nil {
 		log.Fatal("registering:", err)
 	}
