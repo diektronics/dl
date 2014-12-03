@@ -23,6 +23,8 @@ type Configuration struct {
 	PlowdownPath  string
 	HTTPPort      int
 	BackendPort   int
+	LinkRegexp    string
+	Feed          string
 }
 
 func GetConfig(cfgFile string) (*Configuration, error) {

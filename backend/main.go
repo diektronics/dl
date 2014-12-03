@@ -44,5 +44,5 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt)
 	<-signalChan
 	log.Println("entering lame duck mode for 2 seconds")
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Duration(2) * time.Second)
 }

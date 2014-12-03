@@ -9,14 +9,16 @@ import (
 	"time"
 
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/frontend/web/server"
+	"diektronics.com/carter/dl/frontend/tvd/tvd"
 )
 
 var cfgFile = flag.String(
 	"cfg",
-	filepath.Join(os.Getenv("HOME"), ".config", "dl", "config.json"),
+	filepath.Join(os.Getenv("HOME"), ".config", "tvd", "config.json"),
 	"Configuration file in JSON format indicating DB credentials and mailing details.",
 )
+
+const waitingTime = time.Duration(5) * time.Minute
 
 func main() {
 	flag.Parse()
@@ -25,7 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	server.New(c).Run()
+	tvd.New(c).Run(waitingTime)
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)

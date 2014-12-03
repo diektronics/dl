@@ -1,3 +1,4 @@
+// Package dl includes types and functions to download files.
 package dl
 
 import (
@@ -15,6 +16,9 @@ import (
 	"diektronics.com/carter/dl/types"
 )
 
+// Downloader exports five functions that are made abailable through an RPC interface
+// to add downloads to a working queue, get information of what is happening, delete
+// old downloads, and get a list of available commands to run after completing a download.
 type Downloader struct {
 	q          chan *link
 	db         *db.Db
@@ -28,6 +32,8 @@ type link struct {
 	ch          chan *types.Link
 }
 
+// New returns a pointer to Downloader provided a configuration and the number of workers
+// to use.
 func New(c *cfg.Configuration, nWorkers int) *Downloader {
 	d := &Downloader{
 		q:          make(chan *link, 1000),
@@ -116,7 +122,7 @@ func (d *Downloader) download(down *types.Download) {
 		}
 		log.Println("download:", down.Name, "about to run posthook", hookName)
 		ch := make(chan error)
-		data := &hook.Data{files, ch, down.Name}
+		data := &hook.Data{Files: files, Ch: ch, Extra: down.Name}
 		h.Channel() <- data
 		err := <-data.Ch
 		if err != nil {

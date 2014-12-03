@@ -16,7 +16,7 @@ func init() {
 	names = append(names, "RENAME")
 }
 
-// rename moves data.Files[0] into data.NewName, keeping the same directory and extension.
+// rename moves data.Files[0] into data.extra, keeping the same directory and extension.
 func rename(i int, h *Hook) {
 	log.Println("rename:", i, "ready for action")
 	for {
@@ -32,7 +32,7 @@ func rename(i int, h *Hook) {
 				if idx := strings.LastIndex(fn, "."); idx != -1 {
 					extension = fn[idx:len(fn)]
 				}
-				newName := filepath.Join(filepath.Dir(file), data.NewName+extension)
+				newName := filepath.Join(filepath.Dir(file), data.Extra.(string)+extension)
 				if err = os.Rename(file, newName); err != nil {
 					log.Println("rename: error renaming", file, err)
 				}
