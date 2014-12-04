@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
+	"path/filepath"
 	"time"
 
 	"diektronics.com/carter/dl/cfg"
+	"diektronics.com/carter/dl/frontend/tvd/db"
+	"diektronics.com/carter/dl/frontend/tvd/feed"
 	"diektronics.com/carter/dl/types"
 )
 
@@ -14,8 +17,6 @@ type Datamanager struct {
 	c       *cfg.Configuration
 	backend string
 }
-
-type Show struct{}
 
 func New(c *cfg.Configuration) *Datamanager {
 	return &Datamanager{
@@ -41,7 +42,7 @@ func (dm *Datamanager) worker(t time.Duration) {
 }
 
 func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
-	shows, newTimestamp, err := dm.scrapeShows()
+	shows, newTimestamp, err := feed.ScrapeShows(dm.c.Feed)
 	if err != nil {
 		return timestamp, fmt.Errorf("scrapeShows: %v", err)
 	}
@@ -52,7 +53,7 @@ func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
 	if err != nil {
 		return timestamp, fmt.Errorf("selectMyShows: %v", err)
 	}
-	downs, err := dm.getLinks(myShows)
+	toDown, err := dm.getLinks(myShows)
 	if err != nil {
 		return timestamp, fmt.Errorf("getLinks: %v", err)
 	}
@@ -61,19 +62,57 @@ func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
 		return timestamp, fmt.Errorf("dialing: %v", err)
 	}
 	defer client.Close()
-	for _, d := range downs {
-		if err := client.Call("Downloader.Download", d, nil); err != nil {
+	for _, d := range toDown {
+		if err := client.Call("Downloader.Download", d.Down, nil); err != nil {
 			return timestamp, fmt.Errorf("Download: %v", err)
-		}
-		if err := dm.updateLastEpisode(d); err != nil {
-			return timestamp, fmt.Errorf("updateLastEpisode: %v", err)
 		}
 	}
 
-	return newTimestamp, nil
+	return newTimestamp, db.New(dm.c).UpdateMyShows(toDown)
 }
 
-func (dm *Datamanager) scrapeShows() ([]*Show, time.Time, error)          { return nil, *new(time.Time), nil }
-func (dm *Datamanager) selectMyShows(shows []*Show) ([]*Show, error)      { return nil, nil }
-func (dm *Datamanager) getLinks(shows []*Show) ([]*types.Download, error) { return nil, nil }
-func (dm *Datamanager) updateLastEpisode(down *types.Download) error      { return nil }
+func (dm *Datamanager) selectMyShows(shows []*types.Show) ([]*types.Show, error) {
+	titles := []string{}
+	showMap := make(map[string][]*types.Show)
+	for _, s := range shows {
+		titles = append(titles, s.Name)
+		showMap[s.Name] = append(showMap[s.Name], s)
+	}
+
+	// Select among these shows the ones I really watch.
+	eps, err := db.New(dm.c).GetMyShows(titles)
+	if err != nil {
+		return nil, err
+	}
+	myShows := []*types.Show{}
+	for _, ep := range eps {
+		for _, s := range showMap[ep.Title] {
+			if s.Eps > ep.Episode {
+				season, err := feed.Season(s.Eps)
+				if err != nil {
+					log.Println("selectMyShows:", err)
+					continue
+				}
+				s.Down = &types.Download{
+					Name:        fmt.Sprintf("%v - %v", s.Name, s.Eps),
+					Destination: filepath.Join(ep.Location, s.Name, season),
+					Posthook:    "RENAME",
+				}
+				myShows = append(myShows, s)
+			}
+		}
+	}
+
+	return myShows, nil
+}
+
+func (dm *Datamanager) getLinks(shows []*types.Show) ([]*types.Show, error) {
+	toDown := []*types.Show{}
+	for _, s := range shows {
+		if link := feed.Link(dm.c.LinkRegexp, s); len(link) > 0 {
+			s.Down.Links = append(s.Down.Links, &types.Link{URL: link})
+			toDown = append(toDown, s)
+		}
+	}
+	return toDown, nil
+}

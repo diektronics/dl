@@ -59,3 +59,12 @@ type HookReply struct {
 type GetAllReply struct {
 	Downs []*Download
 }
+
+// tvd types
+// TODO(diek): I don't think this should go here...
+type Show struct {
+	Name string
+	Eps  string
+	Blob string
+	Down *Download
+}
