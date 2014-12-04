@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 
 	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/types"
@@ -35,12 +34,24 @@ func (d *Db) GetMyShows(titles []string) ([]*Episode, error) {
 	}
 	defer db.Close()
 
-	dbQuery := fmt.Sprintf("SELECT name, latest_ep, location FROM series where name IN (%s)", strings.Join(titles, ","))
-	rows, err := db.Query(dbQuery)
+	dbQuery := "SELECT name, latest_ep, location FROM series where name IN ("
+	vals := []interface{}{}
+	for _, t := range titles {
+		dbQuery += "?,"
+		vals = append(vals, t)
+	}
+	dbQuery = dbQuery[0 : len(dbQuery)-1]
+	dbQuery += ")"
+	stmt, err := db.Prepare(dbQuery)
 	if err != nil {
 		return nil, err
 	}
 
+	rows, err := stmt.Query(vals...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 	myShows := []*Episode{}
 	for rows.Next() {
 		eps := &Episode{}
