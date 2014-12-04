@@ -63,6 +63,7 @@ func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
 	}
 	defer client.Close()
 	for _, d := range toDown {
+		log.Println(d.Down)
 		if err := client.Call("Downloader.Download", d.Down, nil); err != nil {
 			return timestamp, fmt.Errorf("Download: %v", err)
 		}

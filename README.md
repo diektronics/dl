@@ -12,10 +12,9 @@
 TODO
 ====
 * Use user certificates for multiuser support
-* Make tvd into a frontend
 
-DONE
-====
+DONE v2.0
+=========
 * Make dl into a backend with an RPC API.
   * GetAll
   * Download
@@ -25,6 +24,7 @@ DONE
 * Run Downloader.recovery() in New()
 * Add destination to Download
 * Create RENAME hook
+* Make tvd into a frontend
 
 
 DONE v1.0
