@@ -159,7 +159,7 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 		}
 		log.Printf("download: %d getting %q into %q\n", i, l.l.URL, l.destination)
 		cmd := []string{c.PlowdownPath,
-			"--engine=xfilesharing",
+			//"--engine=xfilesharing",
 			"--output-directory=" + l.destination,
 			"--printf=%F",
 			"--temp-rename",
