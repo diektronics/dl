@@ -15,6 +15,7 @@ TODO
 
 DONE v2.0
 =========
+* Mirrored in github.
 * Make dl into a backend with an RPC API.
   * GetAll
   * Download
