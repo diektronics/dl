@@ -1,8 +1,8 @@
 ========
 | v2.0 |
 ========
-* Merge with tvd
-* Make downloader into a backend
+* Merged with tvd
+* Made downloader into a backend
 * Two different frontends:
   * web for:
     * manual downloads
