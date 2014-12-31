@@ -108,8 +108,10 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 	log.Println(req)
 
 	hooks := []string{}
-	for h := range req.Hooks {
-		hooks = append(hooks, h)
+	for h, ok := range req.Hooks {
+		if ok {
+			hooks = append(hooks, h)
+		}
 	}
 	links := []*types.Link{}
 	for _, url := range strings.Split(req.Links, "\n") {
