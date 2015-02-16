@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"sort"
 
 	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/types"
@@ -71,6 +72,7 @@ func (d *Db) UpdateMyShows(shows []*types.Show) error {
 	}
 	defer db.Close()
 	var lastErr error
+	sort.Sort(types.ByAlpha(shows))
 	for _, s := range shows {
 		dbQuery := fmt.Sprintf("UPDATE series SET latest_ep=%q WHERE name=%q", s.Eps, s.Name)
 		_, err = db.Exec(dbQuery)

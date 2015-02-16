@@ -68,3 +68,11 @@ type Show struct {
 	Blob string
 	Down *Download
 }
+
+type ByAlpha []*Show
+
+func (s ByAlpha) Len() int      { return len(s) }
+func (s ByAlpha) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s ByAlpha) Less(i, j int) bool {
+	return s[i].Name < s[j].Name || s[i].Name == s[j].Name && s[i].Eps < s[j].Eps
+}
