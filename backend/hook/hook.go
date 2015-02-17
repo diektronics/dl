@@ -37,7 +37,7 @@ func Names() []string { return names }
 func All() map[string]*Hook { return all }
 
 func Order(h string) (int, error) {
-	if i, ok := order[h]; !ok {
+	if i, ok := order[h]; ok {
 		return i, nil
 	} else {
 		return i, fmt.Errorf("%v is not a valid hook", h)

@@ -10,6 +10,7 @@ func init() {
 	// no need to have many idle threads.
 	all["REMOVE"] = New("REMOVE", remove, 1)
 	names = append(names, "REMOVE")
+	order["REMOVE"] = 1
 }
 
 func remove(i int, h *Hook) {

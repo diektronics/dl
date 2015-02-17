@@ -14,6 +14,7 @@ func init() {
 	// doing the same.
 	all["RENAME"] = New("RENAME", rename, 1)
 	names = append(names, "RENAME")
+	order["RENAME"] = 2
 }
 
 // rename moves data.Files[0] into data.extra, keeping the same directory and extension.
