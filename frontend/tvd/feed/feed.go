@@ -25,15 +25,20 @@ type item struct {
 }
 
 func Link(linkRegexp string, show *types.Show) string {
-	titleEp := fmt.Sprintf("%s\\.%s\\.720p.*\\.mkv",
-		strings.ToLower(strings.Replace(deparenthesize(show.Name), " ", "\\.", -1)),
-		strings.ToLower(show.Eps))
-	reStr := "(?i)(?P<link>" + linkRegexp + titleEp + ")"
-	ret, err := match(reStr, show.Blob)
-	if err != nil {
-		return ""
+	titleEps := []string{
+		fmt.Sprintf("%s\\.%s\\.720p.*\\.mkv",
+			strings.ToLower(strings.Replace(deparenthesize(show.Name), " ", "\\.", -1)),
+			strings.ToLower(show.Eps)),
+		fmt.Sprintf(".*\\.%s\\.720p.*\\.mkv",
+			strings.ToLower(show.Eps))}
+	for _, titleEp := range titleEps {
+		reStr := "(?i)(?P<link>" + linkRegexp + titleEp + ")"
+		ret, err := match(reStr, show.Blob)
+		if err == nil {
+			return ret["link"]
+		}
 	}
-	return ret["link"]
+	return ""
 }
 
 func ScrapeShows(url string) ([]*types.Show, time.Time, error) {
@@ -84,26 +89,6 @@ func Season(ep string) (string, error) {
 
 	return fmt.Sprintf("Season%d", season), nil
 }
-
-// func (f Feed) SetLinks(shows []*common.Episode) ([]*common.Episode, error) {}
-// 	// We range the array in reverse because episodes are added on the top of the feed,
-// 	// and when a show has two episodes back to back, we will first find the newest one.
-// 	for i := len(shows[name]) - 1; i >= 0; i-- {
-// 		s := shows[name][i]
-// 		if latest_ep < s.eps {
-// 			log.Printf("title: %q episode: %q latest_ep: %q\n", name, s.eps, latest_ep)
-// 			link := s.it.Link(d.linkRegexp)
-
-// 			if len(link) != 0 {
-// 				log.Printf("link: %q\n", link)
-// 				log.Println("update latest_ep in DB")
-//
-// 				log.Println("download the thing")
-
-// 			}
-// 		}
-// 	}
-// }
 
 func match(reStr string, s string) (map[string]string, error) {
 	re := regexp.MustCompile(reStr)
