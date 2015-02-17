@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"diektronics.com/carter/dl/backend/db"
@@ -68,6 +69,9 @@ func (d *Downloader) recovery() error {
 func (d *Downloader) Download(down *types.Download, _ *string) error {
 	if len(down.Destination) == 0 {
 		down.Destination = filepath.Join(d.defaultDir, down.Name)
+	}
+	if err := sanitizeHooks(down); err != nil {
+		return err
 	}
 	if err := d.db.Add(down); err != nil {
 		return err
@@ -200,5 +204,20 @@ func (d *Downloader) Del(down *types.Download, _ *string) error {
 
 func (d *Downloader) HookNames(_ string, reply *types.HookReply) error {
 	reply.Names = hook.Names()
+	return nil
+}
+
+func sanitizeHooks(down *types.Download) error {
+	if len(down.Posthook) == 0 {
+		return nil
+	}
+	hooks := strings.Split(down.Posthook, ",")
+	for _, h := range hooks {
+		if _, err := hook.Order(h); err != nil {
+			return err
+		}
+	}
+	sort.Sort(hook.ByOrder(hooks))
+	down.Posthook = strings.Join(hooks, ",")
 	return nil
 }
