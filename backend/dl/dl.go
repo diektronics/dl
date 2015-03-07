@@ -2,6 +2,7 @@
 package dl
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -184,6 +185,11 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 }
 
 func (d *Downloader) GetAll(statuses []types.Status, reply *types.GetAllReply) error {
+	if reply == nil {
+		err := errors.New("GetAll: reply is a nil pointer")
+		log.Println(err)
+		return err
+	}
 	var err error
 	reply.Downs, err = d.db.GetAll(statuses)
 	if err != nil {
@@ -193,6 +199,11 @@ func (d *Downloader) GetAll(statuses []types.Status, reply *types.GetAllReply) e
 }
 
 func (d *Downloader) Get(id int64, down *types.Download) error {
+	if down == nil {
+		err := errors.New("Get: down is a nil pointer")
+		log.Println(err)
+		return err
+	}
 	ret, err := d.db.Get(id)
 	*down = *ret
 	return err
@@ -203,6 +214,11 @@ func (d *Downloader) Del(down *types.Download, _ *string) error {
 }
 
 func (d *Downloader) HookNames(_ string, reply *types.HookReply) error {
+	if reply == nil {
+		err := errors.New("HookNames: reply is a nil pointer")
+		log.Println(err)
+		return err
+	}
 	reply.Names = hook.Names()
 	return nil
 }
