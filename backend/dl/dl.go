@@ -208,6 +208,7 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 }
 
 func (d *Downloader) sizeMonitor(fileName string, fileSize float64, l *types.Link, done, monitorDone chan struct{}) {
+	log.Println("sizeMonitor", fileName, fileSize, l.Percent)
 	for {
 		select {
 		default:
