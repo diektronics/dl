@@ -15,13 +15,13 @@ TODO
     }
 
   * Probably a dB change to keep the % of data downloaded.
-* Fix bug that kills the web frontend when deleting twice a download in a slow network
 
 DONE v2.5
 =========
 * Allow to download multiple episodes of the same show without confusing the dB
 * Allow to donwload shows in tvd frontend that don't have the proper name structure (Sleepy Hoolow)
 * Use numbers in hooks to properly sort them
+* Fix bug that kills the backend when deleting twice a download in a slow network from web frontend 
 
 DONE v2.0
 =========
