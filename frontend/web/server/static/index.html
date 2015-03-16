@@ -42,7 +42,7 @@
             <li><strong>Destination:</strong> {{d.Destination}}</li>
             <li><strong>Links</strong></li>
             <ul>
-              <li ng-repeat="l in d.Links" class="item"><a href="{{l.URL}}" class="{{l.Status}}">{{l.URL}}</a></li>
+              <li ng-repeat="l in d.Links" class="item"><a href="{{l.URL}}" class="{{l.Status}}">{{l.URL}}</a> {{l.Percent}}%</li>
             </ul>
             <li><span class="WARNING" ng-click="delDownload(d)">DELETE</span></li>
           </ul>

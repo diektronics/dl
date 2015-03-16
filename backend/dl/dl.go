@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"diektronics.com/carter/dl/backend/db"
@@ -17,7 +18,7 @@ import (
 	"diektronics.com/carter/dl/types"
 )
 
-// Downloader exports five functions that are made abailable through an RPC interface
+// Downloader exports five functions that are made available through an RPC interface
 // to add downloads to a working queue, get information of what is happening, delete
 // old downloads, and get a list of available commands to run after completing a download.
 type Downloader struct {
@@ -162,24 +163,63 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 			continue
 		}
 		log.Printf("download: %d getting %q into %q\n", i, l.l.URL, l.destination)
-		cmd := []string{c.PlowdownPath,
+		cmd := []string{c.PlowprobePath,
+			"--printf=%f%t%s%n",
+			l.l.URL}
+		output, err := exec.Command((cmd[0]), cmd[1:]...).CombinedOutput()
+		if err != nil {
+			log.Println("download:", i, "err:", err)
+			log.Println("download:", i, "output:", string(output))
+			l.l.Status = types.Error
+			l.ch <- l.l
+			continue
+		}
+		parts := strings.Fields(strings.TrimSpace(string(output)))
+		fileSize, _ := strconv.ParseFloat(parts[len(parts)-1], 64)
+		fileName := filepath.Join(l.destination, strings.Join(parts[:len(parts)-1], " "))
+		done := make(chan struct{})
+		monitorDone := make(chan struct{})
+		go d.sizeMonitor(fileName, fileSize, l.l, done, monitorDone)
+
+		cmd = []string{c.PlowdownPath,
 			//"--engine=xfilesharing",
 			"--output-directory=" + l.destination,
 			"--printf=%F",
 			"--temp-rename",
 			l.l.URL}
-		output, err := exec.Command(cmd[0], cmd[1:]...).CombinedOutput()
+		output, err = exec.Command(cmd[0], cmd[1:]...).CombinedOutput()
+		close(done)
+		<-monitorDone
 		if err != nil {
 			log.Println("download:", i, "err:", err)
 			log.Println("download:", i, "output:", string(output))
 			l.l.Status = types.Error
 		} else {
-			parts := strings.Split(strings.TrimSpace(string(output)), "\n")
+			parts = strings.Split(strings.TrimSpace(string(output)), "\n")
 			l.l.Filename = parts[len(parts)-1]
 			log.Println("download:", i, l.l.URL, "download complete")
 			l.l.Status = types.Success
+			l.l.Percent = 100.0
 		}
+
 		l.ch <- l.l
+	}
+}
+
+func (d *Downloader) sizeMonitor(fileName string, fileSize float64, l *types.Link, done, monitorDone chan struct{}) {
+	for {
+		select {
+		default:
+			if fi, err := os.Stat(fileName); err != nil {
+				l.Percent = float64(fi.Size()) / fileSize * 100
+				if err := d.db.Update(l); err != nil {
+					log.Println("download: error updating:", err)
+				}
+			}
+		case <-done:
+			close(monitorDone)
+			return
+		}
 	}
 }
 

@@ -5,6 +5,16 @@ TODO
 ====
 * Use user certificates for multiuser support
 * Download progress reporting
+  * Use plowprobe --printf=%f%t%s%n <URL>
+  * Then os.Stat() corresponding .part file in dir, and divide/normalize.
+  * os.Stat() calls can happen in a goroutine that lives in paralel with download().
+
+    var size int64
+    if fi, err := os.Stat(dl.Name); err != nil {
+      size = fi.Size()
+    }
+
+  * Probably a dB change to keep the % of data downloaded.
 * Fix bug that kills the web frontend when deleting twice a download in a slow network
 
 DONE v2.5
@@ -67,6 +77,7 @@ DONE v1.0
     download_id INT UNSIGNED NOT NULL,
     url varchar(255) NOT NULL,
     status varchar(10) NOT NULL DEFAULT "QUEUED",
+    percent float NOT NULL DEFAULT 0.0,
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL,
     PRIMARY KEY(id),

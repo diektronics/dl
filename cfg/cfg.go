@@ -21,6 +21,7 @@ type Configuration struct {
 	MailPassword  string
 	DownloadDir   string
 	PlowdownPath  string
+	PlowprobePath string
 	HTTPPort      int
 	BackendPort   int
 	LinkRegexp    string

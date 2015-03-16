@@ -102,14 +102,14 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 		}
 	}
 
-	rows, err := db.Query("SELECT id, url, status, created_at, modified_at FROM links WHERE download_id=?", id)
+	rows, err := db.Query("SELECT id, url, status, percent, created_at, modified_at FROM links WHERE download_id=?", id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		l := &types.Link{}
-		if err := rows.Scan(&l.ID, &l.URL, &status, &l.CreatedAt, &l.ModifiedAt); err != nil {
+		if err := rows.Scan(&l.ID, &l.URL, &status, &l.Percent, &l.CreatedAt, &l.ModifiedAt); err != nil {
 			return nil, err
 		}
 		l.Status = types.Status(status)
@@ -166,14 +166,14 @@ func (d *Db) GetAll(statuses []types.Status) ([]*types.Download, error) {
 			}
 		}
 
-		rowsLinks, err := db.Query("SELECT id, url, status, created_at, modified_at FROM links WHERE download_id=?", down.ID)
+		rowsLinks, err := db.Query("SELECT id, url, status, percent, created_at, modified_at FROM links WHERE download_id=?", down.ID)
 		if err != nil {
 			return nil, err
 		}
 		defer rowsLinks.Close()
 		for rowsLinks.Next() {
 			l := &types.Link{}
-			if err := rowsLinks.Scan(&l.ID, &l.URL, &status, &l.CreatedAt, &l.ModifiedAt); err != nil {
+			if err := rowsLinks.Scan(&l.ID, &l.URL, &status, &l.Percent, &l.CreatedAt, &l.ModifiedAt); err != nil {
 				return nil, err
 			}
 			l.Status = types.Status(status)

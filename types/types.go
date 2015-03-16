@@ -25,6 +25,7 @@ type Link struct {
 	CreatedAt  time.Time
 	ModifiedAt time.Time
 	Filename   string
+	Percent    float64
 }
 
 type Status string
