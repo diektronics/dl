@@ -335,8 +335,8 @@ func updateDownload(tx *sql.Tx, down *types.Download) error {
 func updateLink(tx *sql.Tx, links []*types.Link) error {
 	now := time.Now()
 	for _, l := range links {
-		res, err := tx.Exec("UPDATE links SET status=?, modified_at=? WHERE id=?",
-			string(l.Status), now, l.ID)
+		res, err := tx.Exec("UPDATE links SET status=?, percent=?, modified_at=? WHERE id=?",
+			string(l.Status), l.Percent, now, l.ID)
 		if err != nil {
 			return err
 		}

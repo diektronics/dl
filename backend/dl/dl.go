@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"diektronics.com/carter/dl/backend/db"
 	"diektronics.com/carter/dl/backend/hook"
@@ -180,7 +181,7 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 		fileName := filepath.Join(l.destination, strings.Join(parts[:len(parts)-1], " "))
 		done := make(chan struct{})
 		monitorDone := make(chan struct{})
-		go d.sizeMonitor(fileName, fileSize, l.l, done, monitorDone)
+		go d.sizeMonitor(fileName+".part", fileSize, l.l, done, monitorDone)
 
 		cmd = []string{c.PlowdownPath,
 			//"--engine=xfilesharing",
@@ -208,16 +209,16 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 }
 
 func (d *Downloader) sizeMonitor(fileName string, fileSize float64, l *types.Link, done, monitorDone chan struct{}) {
-	log.Println("sizeMonitor", fileName, fileSize, l.Percent)
 	for {
 		select {
 		default:
-			if fi, err := os.Stat(fileName); err != nil {
-				l.Percent = float64(fi.Size()) / fileSize * 100
+			if fi, err := os.Stat(fileName); err == nil {
+				l.Percent = float64(fi.Size()) / fileSize * 100.0
 				if err := d.db.Update(l); err != nil {
 					log.Println("download: error updating:", err)
 				}
 			}
+			time.Sleep(time.Duration(5) * time.Second)
 		case <-done:
 			close(monitorDone)
 			return
