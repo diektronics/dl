@@ -34,7 +34,7 @@ func (dm *Datamanager) worker(t time.Duration) {
 	for {
 		var err error
 		timestamp, err = dm.doer(timestamp)
-                log.Println("--mark--", timestamp)
+		log.Println("--mark--", timestamp)
 		if err != nil {
 			log.Println(err)
 		}

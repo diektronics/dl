@@ -45,8 +45,12 @@ func (d *Downloader) Get(id int64, down *types.Download) error {
 		return err
 	}
 	ret, err := d.db.Get(id)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 	*down = *ret
-	return err
+	return nil
 }
 
 func (d *Downloader) Del(down *types.Download, _ *string) error {
