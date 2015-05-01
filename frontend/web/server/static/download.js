@@ -59,6 +59,14 @@ angular.module('downApp', [])
       return $scope.visible[down.ID] ? '-' : '+';
     }
 
+    $scope.globalProgress = function(down){
+      var total = 0.0;
+      for (var i = 0; i < down.Links.length; i++) {
+        total += down.Links[i].Percent;
+      }
+      return total / down.Links.length; 
+    }
+
     getHooks();
     refresh().then(function() { $scope.working = false; });
   
