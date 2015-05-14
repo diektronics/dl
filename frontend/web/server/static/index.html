@@ -30,7 +30,7 @@
     <h2>downloads</h2>
 
     <ul class="grey rounded-box">
-      <li ng-repeat="d in downs"> <span ng-click="toggleVisibility(d)" class="{{d.Status}}">{{moreOrLess(d)}} {{d.Name}} [{{globalProgress(d) | number : 1}}%]</span>
+      <li ng-repeat="d in downs"> <span ng-click="toggleVisibility(d)" class="{{d.Status}}">{{moreOrLess(d)}} {{d.Name}}</span> [{{globalProgress(d) | number : 1}}%]
         <div ng-show="visible[d.ID]">
           <ul>
             <li><strong>Status:</strong> <span class="{{d.Status}}">{{d.Status}}</span></li>
