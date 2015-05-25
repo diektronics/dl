@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/rpc"
 	"strconv"
 	"strings"
 
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/types"
+	dlpb "diektronics.com/carter/dl/protos/dl"
 	"github.com/gorilla/mux"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -80,17 +81,18 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 }
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
-	client, err := rpc.DialHTTP("tcp", s.backend)
+	conn, err := grpc.Dial(s.backend)
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
 	}
-	defer client.Close()
-	var reply types.GetAllReply
-	if err := client.Call("Downloader.GetAll", []types.Status{}, &reply); err != nil {
+	defer conn.Close()
+	client := dlpb.NewDlClient(conn)
+	reply, err := client.GetAll(context.Background(), &dlpb.GetAllRequest{})
+	if err != nil {
 		return err
 	}
-	res := struct{ Downs []*types.Download }{reply.Downs}
+	res := struct{ Downs []*dlpb.Down }{reply.Downs}
 	return json.NewEncoder(w).Encode(res)
 }
 
@@ -112,25 +114,26 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 			hooks = append(hooks, h)
 		}
 	}
-	links := []*types.Link{}
+	links := []*dlpb.Link{}
 	for _, url := range strings.Split(req.Links, "\n") {
 		url = strings.TrimSpace(url)
 		if len(url) > 0 {
-			l := &types.Link{URL: url}
+			l := &dlpb.Link{Url: url}
 			links = append(links, l)
 		}
 	}
-	down := &types.Download{Name: req.Name, Posthook: strings.Join(hooks, ","), Links: links}
+	down := &dlpb.Down{Name: req.Name, Posthook: hooks, Links: links}
 	if len(down.Name) == 0 || len(down.Links) == 0 {
 		return badRequest{errors.New("please provide a name and links to download")}
 	}
-	client, err := rpc.DialHTTP("tcp", s.backend)
+	conn, err := grpc.Dial(s.backend)
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
 	}
-	defer client.Close()
-	if err := client.Call("Downloader.Download", down, nil); err != nil {
+	defer conn.Close()
+	client := dlpb.NewDlClient(conn)
+	if _, err := client.Download(context.Background(), &dlpb.DownloadRequest{Down: down}); err != nil {
 		return err
 	}
 
@@ -142,17 +145,18 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
-	client, err := rpc.DialHTTP("tcp", s.backend)
+	conn, err := grpc.Dial(s.backend)
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
 	}
-	defer client.Close()
-	var down types.Download
-	if err := client.Call("Downloader.Get", id, &down); err != nil {
+	defer conn.Close()
+	client := dlpb.NewDlClient(conn)
+	reply, err := client.Get(context.Background(), &dlpb.GetRequest{Id: id})
+	if err != nil {
 		return notFound{}
 	}
-	return json.NewEncoder(w).Encode(&down)
+	return json.NewEncoder(w).Encode(reply.Down)
 }
 
 func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
@@ -160,17 +164,18 @@ func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
-	client, err := rpc.DialHTTP("tcp", s.backend)
+	conn, err := grpc.Dial(s.backend)
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
 	}
-	defer client.Close()
-	var down types.Download
-	if err := client.Call("Downloader.Get", id, &down); err != nil {
+	defer conn.Close()
+	client := dlpb.NewDlClient(conn)
+	reply, err := client.Get(context.Background(), &dlpb.GetRequest{Id: id})
+	if err != nil {
 		return notFound{}
 	}
-	if err := client.Call("Downloader.Del", &down, nil); err != nil {
+	if _, err := client.Del(context.Background(), &dlpb.DelRequest{Down: reply.Down}); err != nil {
 		return err
 	}
 	return nil
@@ -185,14 +190,17 @@ func parseID(r *http.Request) (int64, error) {
 }
 
 func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
-	client, err := rpc.DialHTTP("tcp", s.backend)
+	conn, err := grpc.Dial(s.backend)
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
 	}
-	defer client.Close()
-	var reply types.HookReply
-	client.Call("Downloader.HookNames", "", &reply)
+	defer conn.Close()
+	client := dlpb.NewDlClient(conn)
+	reply, err := client.HookNames(context.Background(), &dlpb.HookNamesRequest{})
+	if err != nil {
+		return err
+	}
 	res := struct{ Hooks []string }{reply.Names}
 	return json.NewEncoder(w).Encode(res)
 }

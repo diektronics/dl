@@ -9,98 +9,109 @@ import (
 	"time"
 
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/types"
+	dlpb "diektronics.com/carter/dl/protos/dl"
 	_ "github.com/Go-SQL-Driver/MySQL"
+	"github.com/golang/protobuf/proto"
 )
 
 type Db struct {
 	connectionString string
-	q                chan interface{}
+	q                chan proto.Message
 }
 
 func New(c *cfg.Configuration) *Db {
 	d := &Db{
 		connectionString: fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local",
 			c.DbUser, c.DbPassword, c.DbServer, c.DbDatabase),
-		q: make(chan interface{}, 1000),
+		q: make(chan proto.Message, 1000),
 	}
 	go d.worker(0)
 
 	return d
 }
 
-func (d *Db) Add(down *types.Download) error {
+func (d *Db) Add(down *dlpb.Down) (int64, error) {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer db.Close()
 
 	now := time.Now()
 	tx, err := db.Begin()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	res, err := tx.Exec("INSERT INTO downloads (name, posthook, destination, created_at, modified_at) VALUES (?, ?, ?, ?, ?)",
-		down.Name, down.Posthook, down.Destination, now, now)
+		down.Name, strings.Join(down.Posthook, ","), down.Destination, now, now)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
-	down.ID = id
-	down.Status = types.Queued
-	down.CreatedAt = now
-	down.ModifiedAt = now
+	down.Id = id
+	down.Status = dlpb.Status_QUEUED
+	down.CreatedAt = now.Unix()
+	down.ModifiedAt = now.Unix()
 
 	for _, link := range down.Links {
 		res, err := tx.Exec("INSERT INTO links (download_id, url, created_at, modified_at) VALUES (?, ?, ?, ?)",
-			id, link.URL, now, now)
+			id, link.Url, now, now)
 		if err != nil {
 			tx.Rollback()
-			return err
+			return 0, err
 		}
 		link_id, err := res.LastInsertId()
 		if err != nil {
 			tx.Rollback()
-			return err
+			return 0, err
 		}
-		link.ID = link_id
-		link.Status = types.Queued
-		link.CreatedAt = now
-		link.ModifiedAt = now
+		link.Id = link_id
+		link.Status = dlpb.Status_QUEUED
+		link.CreatedAt = now.Unix()
+		link.ModifiedAt = now.Unix()
 	}
 	tx.Commit()
 
-	return nil
+	return id, nil
 }
 
-func (d *Db) Get(id int64) (*types.Download, error) {
+func (d *Db) Get(id int64) (*dlpb.Down, error) {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	down := &types.Download{ID: id}
+	down := &dlpb.Down{Id: id}
 	var status string
 	var errStr string
+	var hooks string
+	var createdAt time.Time
+	var modifiedAt time.Time
 	if err := db.QueryRow("SELECT name, status, error, posthook, destination, created_at, modified_at FROM downloads WHERE id=?", id).Scan(
-		&down.Name, &status, &errStr, &down.Posthook, &down.Destination, &down.CreatedAt, &down.ModifiedAt); err != nil {
+		&down.Name, &status, &errStr, &hooks, &down.Destination, &createdAt, &modifiedAt); err != nil {
 		return nil, err
 	}
-	down.Status = types.Status(status)
+	down.Status = dlpb.Status(dlpb.Status_value[status])
 	for _, e := range strings.Split(errStr, "\n") {
 		if len(e) > 0 {
 			down.Errors = append(down.Errors, e)
 		}
 	}
+	for _, h := range strings.Split(hooks, ",") {
+		if len(h) > 0 {
+			down.Posthook = append(down.Posthook, h)
+		}
+	}
+	down.CreatedAt = createdAt.Unix()
+	down.ModifiedAt = modifiedAt.Unix()
 
 	rows, err := db.Query("SELECT id, url, status, percent, created_at, modified_at FROM links WHERE download_id=?", id)
 	if err != nil {
@@ -108,11 +119,13 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		l := &types.Link{}
-		if err := rows.Scan(&l.ID, &l.URL, &status, &l.Percent, &l.CreatedAt, &l.ModifiedAt); err != nil {
+		l := &dlpb.Link{}
+		if err := rows.Scan(&l.Id, &l.Url, &status, &l.Percent, &createdAt, &modifiedAt); err != nil {
 			return nil, err
 		}
-		l.Status = types.Status(status)
+		l.Status = dlpb.Status(dlpb.Status_value[status])
+		l.CreatedAt = createdAt.Unix()
+		l.ModifiedAt = modifiedAt.Unix()
 		down.Links = append(down.Links, l)
 	}
 	if err := rows.Err(); err != nil {
@@ -122,23 +135,31 @@ func (d *Db) Get(id int64) (*types.Download, error) {
 	return down, nil
 }
 
-func (d *Db) GetAll(statuses []types.Status) ([]*types.Download, error) {
+func allStatuses() []dlpb.Status {
+	out := make([]dlpb.Status, 0, len(dlpb.Status_name))
+	for key := range dlpb.Status_name {
+		out = append(out, dlpb.Status(key))
+	}
+	return out
+}
+
+func (d *Db) GetAll(statuses []dlpb.Status) ([]*dlpb.Down, error) {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	downs := []*types.Download{}
+	downs := []*dlpb.Down{}
 	var status string
 	if statuses == nil || len(statuses) == 0 {
-		statuses = types.AllStatuses()
+		statuses = allStatuses()
 	}
 	query := "SELECT id, name, status, error, posthook, destination, created_at, modified_at FROM downloads WHERE status IN ("
 	vals := []interface{}{}
 	for _, s := range statuses {
 		query += "?,"
-		vals = append(vals, string(s))
+		vals = append(vals, s.String())
 	}
 	query = query[0 : len(query)-1]
 	query += ")"
@@ -154,29 +175,41 @@ func (d *Db) GetAll(statuses []types.Status) ([]*types.Download, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		down := &types.Download{}
+		down := &dlpb.Down{}
 		var errStr string
-		if err := rows.Scan(&down.ID, &down.Name, &status, &errStr, &down.Posthook, &down.Destination, &down.CreatedAt, &down.ModifiedAt); err != nil {
+		var hooks string
+		var createdAt time.Time
+		var modifiedAt time.Time
+		if err := rows.Scan(&down.Id, &down.Name, &status, &errStr, &hooks, &down.Destination, &createdAt, &modifiedAt); err != nil {
 			return nil, err
 		}
-		down.Status = types.Status(status)
+		down.Status = dlpb.Status(dlpb.Status_value[status])
 		for _, e := range strings.Split(errStr, "\n") {
 			if len(e) > 0 {
 				down.Errors = append(down.Errors, e)
 			}
 		}
+		for _, h := range strings.Split(hooks, ",") {
+			if len(h) > 0 {
+				down.Posthook = append(down.Posthook, h)
+			}
+		}
+		down.CreatedAt = createdAt.Unix()
+		down.ModifiedAt = modifiedAt.Unix()
 
-		rowsLinks, err := db.Query("SELECT id, url, status, percent, created_at, modified_at FROM links WHERE download_id=?", down.ID)
+		rowsLinks, err := db.Query("SELECT id, url, status, percent, created_at, modified_at FROM links WHERE download_id=?", down.Id)
 		if err != nil {
 			return nil, err
 		}
 		defer rowsLinks.Close()
 		for rowsLinks.Next() {
-			l := &types.Link{}
-			if err := rowsLinks.Scan(&l.ID, &l.URL, &status, &l.Percent, &l.CreatedAt, &l.ModifiedAt); err != nil {
+			l := &dlpb.Link{}
+			if err := rowsLinks.Scan(&l.Id, &l.Url, &status, &l.Percent, &createdAt, &modifiedAt); err != nil {
 				return nil, err
 			}
-			l.Status = types.Status(status)
+			l.Status = dlpb.Status(dlpb.Status_value[status])
+			l.CreatedAt = createdAt.Unix()
+			l.ModifiedAt = modifiedAt.Unix()
 			down.Links = append(down.Links, l)
 		}
 		if err := rowsLinks.Err(); err != nil {
@@ -188,7 +221,7 @@ func (d *Db) GetAll(statuses []types.Status) ([]*types.Download, error) {
 	return downs, nil
 }
 
-func (d *Db) Del(down *types.Download) error {
+func (d *Db) Del(down *dlpb.Down) error {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
 		return err
@@ -199,7 +232,7 @@ func (d *Db) Del(down *types.Download) error {
 	if err != nil {
 		return err
 	}
-	res, err := tx.Exec("DELETE FROM links WHERE download_id=?", down.ID)
+	res, err := tx.Exec("DELETE FROM links WHERE download_id=?", down.Id)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -214,7 +247,7 @@ func (d *Db) Del(down *types.Download) error {
 		return fmt.Errorf("Del: unexpected rows affected %v != %v", n, len(down.Links))
 	}
 
-	res, err = tx.Exec("DELETE FROM downloads WHERE id=?", down.ID)
+	res, err = tx.Exec("DELETE FROM downloads WHERE id=?", down.Id)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -233,20 +266,20 @@ func (d *Db) Del(down *types.Download) error {
 	return nil
 }
 
-func (d *Db) Update(data interface{}) error {
+func (d *Db) Update(data proto.Message) error {
 	// check data is of the supported types
 	switch data := data.(type) {
 	default:
 		return errors.New("Update: unexpected data")
 
-	case *types.Download, *types.Link:
+	case *dlpb.Down, *dlpb.Link:
 		d.q <- data
 	}
 
 	return nil
 }
 
-func (d *Db) QueueRunning() ([]*types.Download, error) {
+func (d *Db) QueueRunning() ([]*dlpb.Down, error) {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
 		return nil, err
@@ -271,7 +304,7 @@ func (d *Db) QueueRunning() ([]*types.Download, error) {
 
 	tx.Commit()
 
-	return d.GetAll([]types.Status{types.Queued})
+	return d.GetAll([]dlpb.Status{dlpb.Status_QUEUED})
 }
 
 // FIXME(diek): even if there is no change, these updates will always change the data
@@ -293,14 +326,14 @@ func (d *Db) worker(i int) {
 			continue
 		}
 		switch data := data.(type) {
-		case *types.Download:
+		case *dlpb.Down:
 			if err := updateDownload(tx, data); err != nil {
 				tx.Rollback()
 				log.Println("db:", err)
 				continue
 			}
-		case *types.Link:
-			if err := updateLink(tx, []*types.Link{data}); err != nil {
+		case *dlpb.Link:
+			if err := updateLink(tx, []*dlpb.Link{data}); err != nil {
 				tx.Rollback()
 				log.Println("db:", err)
 				continue
@@ -311,39 +344,39 @@ func (d *Db) worker(i int) {
 	}
 }
 
-func updateDownload(tx *sql.Tx, down *types.Download) error {
+func updateDownload(tx *sql.Tx, down *dlpb.Down) error {
 	if err := updateLink(tx, down.Links); err != nil {
 		return err
 	}
 
 	now := time.Now()
 	res, err := tx.Exec("UPDATE downloads SET status=?, error=?, modified_at=? WHERE id=?",
-		string(down.Status), strings.Join(down.Errors, "\n"), now, down.ID)
+		down.Status.String(), strings.Join(down.Errors, "\n"), now, down.Id)
 	if err != nil {
 		return err
 	}
 	if n, err := res.RowsAffected(); err != nil {
 		return err
 	} else if n == 1 {
-		down.ModifiedAt = now
+		down.ModifiedAt = now.Unix()
 
 	}
 
 	return nil
 }
 
-func updateLink(tx *sql.Tx, links []*types.Link) error {
+func updateLink(tx *sql.Tx, links []*dlpb.Link) error {
 	now := time.Now()
 	for _, l := range links {
 		res, err := tx.Exec("UPDATE links SET status=?, percent=?, modified_at=? WHERE id=?",
-			string(l.Status), l.Percent, now, l.ID)
+			l.Status.String(), l.Percent, now, l.Id)
 		if err != nil {
 			return err
 		}
 		if n, err := res.RowsAffected(); err != nil {
 			return err
 		} else if n == 1 {
-			l.ModifiedAt = now
+			l.ModifiedAt = now.Unix()
 		}
 	}
 

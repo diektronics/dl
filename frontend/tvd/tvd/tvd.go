@@ -3,14 +3,16 @@ package tvd
 import (
 	"fmt"
 	"log"
-	"net/rpc"
 	"path/filepath"
 	"time"
 
 	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/frontend/tvd/db"
 	"diektronics.com/carter/dl/frontend/tvd/feed"
-	"diektronics.com/carter/dl/types"
+	"diektronics.com/carter/dl/frontend/tvd/show"
+	dlpb "diektronics.com/carter/dl/protos/dl"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 type Datamanager struct {
@@ -58,14 +60,16 @@ func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
 	if err != nil {
 		return timestamp, fmt.Errorf("getLinks: %v", err)
 	}
-	client, err := rpc.DialHTTP("tcp", dm.backend)
+
+	conn, err := grpc.Dial(dm.backend)
 	if err != nil {
 		return timestamp, fmt.Errorf("dialing: %v", err)
 	}
-	defer client.Close()
+	defer conn.Close()
+	client := dlpb.NewDlClient(conn)
 	for _, d := range toDown {
 		log.Println(d.Down)
-		if err := client.Call("Downloader.Download", d.Down, nil); err != nil {
+		if _, err := client.Download(context.Background(), &dlpb.DownloadRequest{Down: d.Down}); err != nil {
 			return timestamp, fmt.Errorf("Download: %v", err)
 		}
 	}
@@ -73,9 +77,9 @@ func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
 	return newTimestamp, db.New(dm.c).UpdateMyShows(toDown)
 }
 
-func (dm *Datamanager) selectMyShows(shows []*types.Show) ([]*types.Show, error) {
+func (dm *Datamanager) selectMyShows(shows []*show.Show) ([]*show.Show, error) {
 	titles := []string{}
-	showMap := make(map[string][]*types.Show)
+	showMap := make(map[string][]*show.Show)
 	for _, s := range shows {
 		titles = append(titles, s.Name)
 		showMap[s.Name] = append(showMap[s.Name], s)
@@ -86,7 +90,7 @@ func (dm *Datamanager) selectMyShows(shows []*types.Show) ([]*types.Show, error)
 	if err != nil {
 		return nil, err
 	}
-	myShows := []*types.Show{}
+	myShows := []*show.Show{}
 	for _, ep := range eps {
 		for _, s := range showMap[ep.Title] {
 			if s.Eps > ep.Episode {
@@ -95,10 +99,10 @@ func (dm *Datamanager) selectMyShows(shows []*types.Show) ([]*types.Show, error)
 					log.Println("selectMyShows:", err)
 					continue
 				}
-				s.Down = &types.Download{
+				s.Down = &dlpb.Down{
 					Name:        fmt.Sprintf("%v - %v", s.Name, s.Eps),
 					Destination: filepath.Join(ep.Location, s.Name, season),
-					Posthook:    "RENAME",
+					Posthook:    []string{"RENAME"},
 				}
 				myShows = append(myShows, s)
 			}
@@ -108,11 +112,11 @@ func (dm *Datamanager) selectMyShows(shows []*types.Show) ([]*types.Show, error)
 	return myShows, nil
 }
 
-func (dm *Datamanager) getLinks(shows []*types.Show) ([]*types.Show, error) {
-	toDown := []*types.Show{}
+func (dm *Datamanager) getLinks(shows []*show.Show) ([]*show.Show, error) {
+	toDown := []*show.Show{}
 	for _, s := range shows {
 		if link := feed.Link(dm.c.LinkRegexp, s); len(link) > 0 {
-			s.Down.Links = append(s.Down.Links, &types.Link{URL: link})
+			s.Down.Links = append(s.Down.Links, &dlpb.Link{Url: link})
 			toDown = append(toDown, s)
 		}
 	}

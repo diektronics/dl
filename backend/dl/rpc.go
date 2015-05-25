@@ -1,68 +1,52 @@
 package dl
 
 import (
-	"errors"
 	"log"
 	"path/filepath"
 
 	"diektronics.com/carter/dl/backend/hook"
-	"diektronics.com/carter/dl/types"
+	dlpb "diektronics.com/carter/dl/protos/dl"
+	"golang.org/x/net/context"
 )
 
-func (d *Downloader) Download(down *types.Download, _ *string) error {
+func (d *Downloader) Download(ctx context.Context, in *dlpb.DownloadRequest) (*dlpb.DownloadResponse, error) {
+	down := in.Down
 	if len(down.Destination) == 0 {
 		down.Destination = filepath.Join(d.defaultDir, down.Name)
 	}
 	if err := sanitizeHooks(down); err != nil {
-		return err
+		return nil, err
 	}
-	if err := d.db.Add(down); err != nil {
-		return err
+	id, err := d.db.Add(down)
+	if err != nil {
+		return nil, err
 	}
 	go d.download(down)
 
-	return nil
+	return &dlpb.DownloadResponse{Id: id}, nil
 }
 
-func (d *Downloader) GetAll(statuses []types.Status, reply *types.GetAllReply) error {
-	if reply == nil {
-		err := errors.New("GetAll: reply is a nil pointer")
-		log.Println(err)
-		return err
-	}
-	var err error
-	reply.Downs, err = d.db.GetAll(statuses)
+func (d *Downloader) GetAll(ctx context.Context, in *dlpb.GetAllRequest) (*dlpb.GetAllResponse, error) {
+	downs, err := d.db.GetAll(in.Statuses)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &dlpb.GetAllResponse{Downs: downs}, nil
 }
 
-func (d *Downloader) Get(id int64, down *types.Download) error {
-	if down == nil {
-		err := errors.New("Get: down is a nil pointer")
-		log.Println(err)
-		return err
-	}
-	ret, err := d.db.Get(id)
+func (d *Downloader) Get(ctx context.Context, in *dlpb.GetRequest) (*dlpb.GetResponse, error) {
+	down, err := d.db.Get(in.Id)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
-	*down = *ret
-	return nil
+	return &dlpb.GetResponse{Down: down}, nil
 }
 
-func (d *Downloader) Del(down *types.Download, _ *string) error {
-	return d.db.Del(down)
+func (d *Downloader) Del(ctx context.Context, in *dlpb.DelRequest) (*dlpb.DelResponse, error) {
+	return &dlpb.DelResponse{}, d.db.Del(in.Down)
 }
 
-func (d *Downloader) HookNames(_ string, reply *types.HookReply) error {
-	if reply == nil {
-		err := errors.New("HookNames: reply is a nil pointer")
-		log.Println(err)
-		return err
-	}
-	reply.Names = hook.Names()
-	return nil
+func (d *Downloader) HookNames(ctx context.Context, in *dlpb.HookNamesRequest) (*dlpb.HookNamesResponse, error) {
+	return &dlpb.HookNamesResponse{Names: hook.Names()}, nil
 }

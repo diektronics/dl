@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/types"
+	"diektronics.com/carter/dl/frontend/tvd/show"
 
 	_ "github.com/Go-SQL-Driver/MySQL"
 )
@@ -65,14 +65,14 @@ func (d *Db) GetMyShows(titles []string) ([]*Episode, error) {
 	return myShows, nil
 }
 
-func (d *Db) UpdateMyShows(shows []*types.Show) error {
+func (d *Db) UpdateMyShows(shows []*show.Show) error {
 	db, err := sql.Open("mysql", d.connectionString)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 	var lastErr error
-	sort.Sort(types.ByAlpha(shows))
+	sort.Sort(show.ByAlpha(shows))
 	for _, s := range shows {
 		dbQuery := fmt.Sprintf("UPDATE series SET latest_ep=%q WHERE name=%q", s.Eps, s.Name)
 		_, err = db.Exec(dbQuery)

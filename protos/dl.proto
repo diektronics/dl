@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package dlpb;
+
+service Dl {
+  rpc Download(DownloadRequest) returns (DownloadResponse) {}
+
+  rpc GetAll(GetAllRequest) returns (GetAllResponse) {}
+
+  rpc Get(GetRequest) returns (GetResponse) {}
+
+  rpc Del(DelRequest) returns (DelResponse) {}
+
+  rpc HookNames(HookNamesRequest) returns (HookNamesResponse) {}
+}
+
+enum Status {
+  QUEUED = 0;
+  RUNNING = 1;
+  SUCCESS = 2;
+  ERROR = 3;
+}
+
+message Down {
+  int64 id = 1;
+  string name = 2;
+  Status status = 3;
+  repeated string errors = 4;
+  repeated string posthook = 5;
+  string destination = 6;
+  int64 created_at = 7;
+  int64 modified_at = 8;
+  repeated Link links = 9;
+}
+
+message Link {
+  int64 id = 1;
+  string url = 2;
+  Status status = 3;
+  int64 created_at = 4;
+  int64 modified_at = 5;
+  string filename = 6;
+  double percent = 7;
+}
+
+message DownloadRequest {
+  Down down = 1;
+}
+
+message DownloadResponse {
+  int64 id = 1;
+}
+
+message GetAllRequest {
+  repeated Status statuses = 1;
+}
+
+message GetAllResponse {
+  repeated Down downs = 1;
+}
+
+message GetRequest {
+  int64 id = 1;
+}
+
+message GetResponse {
+  Down down = 1;
+}
+
+message DelRequest {
+  Down down = 1;
+}
+
+message DelResponse {}
+
+message HookNamesRequest {}
+
+message HookNamesResponse {
+  repeated string names = 1;
+}

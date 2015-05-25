@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
-	"net/rpc"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -14,6 +12,8 @@ import (
 
 	"diektronics.com/carter/dl/backend/dl"
 	"diektronics.com/carter/dl/cfg"
+	dlpb "diektronics.com/carter/dl/protos/dl"
+	"google.golang.org/grpc"
 )
 
 var cfgFile = flag.String(
@@ -30,15 +30,13 @@ func main() {
 	}
 
 	d := dl.New(c, 5)
-	if err := rpc.Register(d); err != nil {
-		log.Fatal("registering:", err)
-	}
-	rpc.HandleHTTP()
+	s := grpc.NewServer()
+	dlpb.RegisterDlServer(s, d)
 	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", c.BackendPort))
 	if err != nil {
 		log.Fatal("listening:", err)
 	}
-	go http.Serve(l, nil)
+	go s.Serve(l)
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)

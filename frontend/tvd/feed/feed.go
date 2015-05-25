@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"diektronics.com/carter/dl/types"
+	"diektronics.com/carter/dl/frontend/tvd/show"
 )
 
 type data struct {
@@ -24,7 +24,7 @@ type item struct {
 	Content string `xml:"encoded"`
 }
 
-func Link(linkRegexp string, show *types.Show) string {
+func Link(linkRegexp string, show *show.Show) string {
 	titleEps := []string{
 		fmt.Sprintf("%s\\.%s\\.720p.*\\.mkv",
 			strings.ToLower(strings.Replace(deparenthesize(show.Name), " ", "\\.", -1)),
@@ -41,7 +41,7 @@ func Link(linkRegexp string, show *types.Show) string {
 	return ""
 }
 
-func ScrapeShows(url string) ([]*types.Show, time.Time, error) {
+func ScrapeShows(url string) ([]*show.Show, time.Time, error) {
 	var timestamp time.Time
 	stuff, err := http.Get(url)
 	if err != nil {
@@ -64,11 +64,11 @@ func ScrapeShows(url string) ([]*types.Show, time.Time, error) {
 	if err != nil {
 		return nil, timestamp, err
 	}
-	shows := []*types.Show{}
+	shows := []*show.Show{}
 	for _, entry := range d.ItemList {
 		title, eps := tokenize(entry.Title)
 		title = parenthesize(title)
-		shows = append(shows, &types.Show{
+		shows = append(shows, &show.Show{
 			Name: title,
 			Eps:  eps,
 			Blob: entry.Content})

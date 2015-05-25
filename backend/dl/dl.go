@@ -4,13 +4,12 @@ package dl
 import (
 	"log"
 	"sort"
-	"strings"
 
 	"diektronics.com/carter/dl/backend/db"
 	"diektronics.com/carter/dl/backend/hook"
 	"diektronics.com/carter/dl/backend/notifier"
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/types"
+	dlpb "diektronics.com/carter/dl/protos/dl"
 )
 
 // Downloader exports five functions that are made available through an RPC interface
@@ -24,9 +23,9 @@ type Downloader struct {
 }
 
 type link struct {
-	l           *types.Link
+	l           *dlpb.Link
 	destination string
-	ch          chan *types.Link
+	ch          chan *dlpb.Link
 }
 
 // New returns a pointer to Downloader provided a configuration and the number of workers
@@ -62,17 +61,17 @@ func (d *Downloader) recovery() error {
 	return nil
 }
 
-func sanitizeHooks(down *types.Download) error {
+func sanitizeHooks(down *dlpb.Down) error {
 	if len(down.Posthook) == 0 {
 		return nil
 	}
-	hooks := strings.Split(down.Posthook, ",")
+	hooks := down.Posthook
 	for _, h := range hooks {
 		if _, err := hook.Order(h); err != nil {
 			return err
 		}
 	}
 	sort.Sort(hook.ByOrder(hooks))
-	down.Posthook = strings.Join(hooks, ",")
+	down.Posthook = hooks
 	return nil
 }

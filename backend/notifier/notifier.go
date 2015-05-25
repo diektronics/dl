@@ -6,7 +6,7 @@ import (
 	"net/smtp"
 
 	"diektronics.com/carter/dl/cfg"
-	"diektronics.com/carter/dl/types"
+	dlpb "diektronics.com/carter/dl/protos/dl"
 )
 
 type Client struct {
@@ -27,9 +27,9 @@ func New(c *cfg.Configuration) *Client {
 	}
 }
 
-func (n Client) Notify(down *types.Download) {
+func (n Client) Notify(down *dlpb.Down) {
 	header := fmt.Sprintf("From: %s\nTo: %s\nSubject: %s %v\n\n",
-		n.sender, n.recipient, down.Name, down.Status)
+		n.sender, n.recipient, down.Name, down.Status.String())
 	content := []byte(header + down.String())
 
 	addrPort := n.addr
