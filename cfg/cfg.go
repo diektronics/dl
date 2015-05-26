@@ -14,23 +14,23 @@ import (
 func GetConfig(cfgFile string) (*cfgpb.Configuration, error) {
 	f, err := os.Open(cfgFile)
 	if err != nil {
-		return nil, fmt.Errorf("getConfig: %v", err)
+		return nil, fmt.Errorf("GetConfig Open: %v", err)
 	}
 	content := make([]byte, 1000)
 	count, err := f.Read(content)
 	if err != nil {
-		return nil, fmt.Errorf("getConfig: %v", err)
+		return nil, fmt.Errorf("GetConfig Read: %v", err)
 	}
 	if count == 1000 {
-		return nil, fmt.Errorf("getConfig: read buffer is too small %v", count)
+		return nil, fmt.Errorf("GetConfig: read buffer is too small %v", count)
 	}
 	c := &cfgpb.Configuration{}
 	if err := proto.UnmarshalText(string(content[:count]), c); err != nil {
-		return nil, fmt.Errorf("getConfig: %v", err)
+		return nil, fmt.Errorf("GetConfig Unmarshal: %v", err)
 	}
 
 	if err := validate(c); err != nil {
-		return nil, fmt.Errorf("getConfig: Invalid configuration file: %v", err)
+		return nil, fmt.Errorf("GetConfig: Invalid configuration file: %v", err)
 	}
 
 	return c, nil

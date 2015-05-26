@@ -14,7 +14,7 @@ import (
 
 var cfgFile = flag.String(
 	"cfg",
-	filepath.Join(os.Getenv("HOME"), ".config", "dl", "config.json"),
+	filepath.Join(os.Getenv("HOME"), ".config", "dl", "config.cfg"),
 	"Configuration file in JSON format indicating DB credentials and mailing details.",
 )
 
