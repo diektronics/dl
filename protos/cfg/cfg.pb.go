@@ -24,7 +24,7 @@ type Configuration struct {
 	DbPassword    string `protobuf:"bytes,3,opt,name=db_password" json:"db_password,omitempty"`
 	DbDatabase    string `protobuf:"bytes,4,opt,name=db_database" json:"db_database,omitempty"`
 	MailAddr      string `protobuf:"bytes,5,opt,name=mail_addr" json:"mail_addr,omitempty"`
-	MailPort      string `protobuf:"bytes,6,opt,name=mail_port" json:"mail_port,omitempty"`
+	MailPort      int32  `protobuf:"varint,6,opt,name=mail_port" json:"mail_port,omitempty"`
 	MailRecipient string `protobuf:"bytes,7,opt,name=mail_recipient" json:"mail_recipient,omitempty"`
 	MailSender    string `protobuf:"bytes,8,opt,name=mail_sender" json:"mail_sender,omitempty"`
 	MailPassword  string `protobuf:"bytes,9,opt,name=mail_password" json:"mail_password,omitempty"`

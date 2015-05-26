@@ -8,7 +8,7 @@ message Configuration {
 	string db_password = 3;
 	string db_database = 4;
 	string mail_addr = 5;
-	string mail_port = 6;
+	int32 mail_port = 6;
 	string mail_recipient = 7;
 	string mail_sender = 8;
 	string mail_password = 9;

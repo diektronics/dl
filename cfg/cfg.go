@@ -25,7 +25,7 @@ func GetConfig(cfgFile string) (*cfgpb.Configuration, error) {
 		return nil, fmt.Errorf("getConfig: read buffer is too small %v", count)
 	}
 	c := &cfgpb.Configuration{}
-	if err := proto.UnmarshalText(string(content), c); err != nil {
+	if err := proto.UnmarshalText(string(content[:count]), c); err != nil {
 		return nil, fmt.Errorf("getConfig: %v", err)
 	}
 

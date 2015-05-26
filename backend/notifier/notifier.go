@@ -3,6 +3,7 @@ package notifier
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/smtp"
 
 	"diektronics.com/carter/dl/protos/cfg"
@@ -11,7 +12,7 @@ import (
 
 type Client struct {
 	addr      string
-	port      string
+	port      int32
 	recipient string
 	sender    string
 	password  string
@@ -32,10 +33,7 @@ func (n Client) Notify(down *dlpb.Down) {
 		n.sender, n.recipient, down.Name, down.Status.String())
 	content := []byte(header + down.String())
 
-	addrPort := n.addr
-	if n.port != "" {
-		addrPort += ":" + n.port
-	}
+	addrPort := net.JoinHostPort(n.addr, fmt.Sprint(n.port))
 
 	auth := smtp.PlainAuth("", n.sender, n.password, n.addr)
 	to := []string{n.recipient}
