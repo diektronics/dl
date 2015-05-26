@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"diektronics.com/carter/dl/cfg"
+	"diektronics.com/carter/dl/protos/cfg"
 	dlpb "diektronics.com/carter/dl/protos/dl"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
@@ -23,13 +23,13 @@ const (
 )
 
 type Server struct {
-	port    int
+	port    int32
 	backend string
 }
 
 func New(c *cfg.Configuration) *Server {
 	return &Server{
-		port:    c.HTTPPort,
+		port:    c.HttpPort,
 		backend: fmt.Sprintf("localhost:%v", c.BackendPort),
 	}
 }

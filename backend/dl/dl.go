@@ -8,7 +8,7 @@ import (
 	"diektronics.com/carter/dl/backend/db"
 	"diektronics.com/carter/dl/backend/hook"
 	"diektronics.com/carter/dl/backend/notifier"
-	"diektronics.com/carter/dl/cfg"
+	"diektronics.com/carter/dl/protos/cfg"
 	dlpb "diektronics.com/carter/dl/protos/dl"
 )
 

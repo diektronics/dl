@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package cfg;
+
+message Configuration {
+	string db_user = 1;
+	string db_server = 2;
+	string db_password = 3;
+	string db_database = 4;
+	string mail_addr = 5;
+	string mail_port = 6;
+	string mail_recipient = 7;
+	string mail_sender = 8;
+	string mail_password = 9;
+	string download_dir = 10;
+	string plowdown_path = 11;
+	string plowprobe_path = 12;
+	int32 http_port = 13;
+	int32 backend_port = 14;
+	string link_regexp = 15;
+	string feed = 16;
+}

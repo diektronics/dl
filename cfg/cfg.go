@@ -1,52 +1,42 @@
 package cfg
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"reflect"
 	"strings"
+
+	cfgpb "diektronics.com/carter/dl/protos/cfg"
+	"github.com/golang/protobuf/proto"
 )
 
-type Configuration struct {
-	DbUser        string
-	DbServer      string
-	DbPassword    string
-	DbDatabase    string
-	MailAddr      string
-	MailPort      string
-	MailRecipient string
-	MailSender    string
-	MailPassword  string
-	DownloadDir   string
-	PlowdownPath  string
-	PlowprobePath string
-	HTTPPort      int
-	BackendPort   int
-	LinkRegexp    string
-	Feed          string
-}
-
-func GetConfig(cfgFile string) (*Configuration, error) {
-	cfg, err := os.Open(cfgFile)
+func GetConfig(cfgFile string) (*cfgpb.Configuration, error) {
+	f, err := os.Open(cfgFile)
 	if err != nil {
-		return nil, fmt.Errorf("GetConfig: %v", err)
+		return nil, fmt.Errorf("getConfig: %v", err)
 	}
-	decoder := json.NewDecoder(cfg)
-	c := &Configuration{}
-	if err := decoder.Decode(c); err != nil {
-		return nil, fmt.Errorf("GetConfig: %v", err)
+	content := make([]byte, 1000)
+	count, err := f.Read(content)
+	if err != nil {
+		return nil, fmt.Errorf("getConfig: %v", err)
+	}
+	if count == 1000 {
+		return nil, fmt.Errorf("getConfig: read buffer is too small %v", count)
+	}
+	c := &cfgpb.Configuration{}
+	if err := proto.UnmarshalText(string(content), c); err != nil {
+		return nil, fmt.Errorf("getConfig: %v", err)
 	}
 
 	if err := validate(c); err != nil {
-		return nil, fmt.Errorf("GetConfig: Invalid configuration file: %v", err)
+		return nil, fmt.Errorf("getConfig: Invalid configuration file: %v", err)
 	}
 
 	return c, nil
 }
 
-func validate(c *Configuration) error {
+func validate(c *cfgpb.Configuration) error {
 	allErrors := []string{}
 
 	cv := reflect.ValueOf(*c)

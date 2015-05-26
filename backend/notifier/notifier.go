@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/smtp"
 
-	"diektronics.com/carter/dl/cfg"
+	"diektronics.com/carter/dl/protos/cfg"
 	dlpb "diektronics.com/carter/dl/protos/dl"
 )
 

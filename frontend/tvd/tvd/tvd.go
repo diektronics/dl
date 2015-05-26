@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"diektronics.com/carter/dl/cfg"
 	"diektronics.com/carter/dl/frontend/tvd/db"
 	"diektronics.com/carter/dl/frontend/tvd/feed"
 	"diektronics.com/carter/dl/frontend/tvd/show"
+	"diektronics.com/carter/dl/protos/cfg"
 	dlpb "diektronics.com/carter/dl/protos/dl"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
