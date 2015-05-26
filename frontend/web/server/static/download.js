@@ -62,7 +62,8 @@ angular.module('downApp', [])
     $scope.globalProgress = function(down){
       var total = 0.0;
       for (var i = 0; i < down.links.length; i++) {
-        total += down.links[i].percent;
+        var percent = down.links[i].percent || 0.0;
+        total += percent
       }
       return total / down.links.length; 
     }
