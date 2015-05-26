@@ -76,6 +76,7 @@ func (d *Db) Add(down *dlpb.Down) (int64, error) {
 		link.Status = dlpb.Status_QUEUED
 		link.CreatedAt = now.Unix()
 		link.ModifiedAt = now.Unix()
+		link.Percent = 0.0
 	}
 	tx.Commit()
 
