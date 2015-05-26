@@ -42,7 +42,7 @@ angular.module('downApp', [])
 
     $scope.delDownload = function(down) {
       $scope.working = true;
-      $http.delete('down/' + down.ID).
+      $http.delete('down/' + down.id).
         error(logError).
         success(function() {
           refresh().then(function() {
@@ -52,19 +52,19 @@ angular.module('downApp', [])
     };
 
     $scope.toggleVisibility = function(down) {
-      $scope.visible[down.ID] = !$scope.visible[down.ID];
+      $scope.visible[down.id] = !$scope.visible[down.id];
     };
 
     $scope.moreOrLess = function(down) {
-      return $scope.visible[down.ID] ? '-' : '+';
+      return $scope.visible[down.id] ? '-' : '+';
     }
 
     $scope.globalProgress = function(down){
       var total = 0.0;
-      for (var i = 0; i < down.Links.length; i++) {
-        total += down.Links[i].Percent;
+      for (var i = 0; i < down.links.length; i++) {
+        total += down.links[i].percent;
       }
-      return total / down.Links.length; 
+      return total / down.links.length; 
     }
 
     getHooks();

@@ -30,19 +30,19 @@
     <h2>downloads</h2>
 
     <ul class="grey rounded-box">
-      <li ng-repeat="d in downs"> <span ng-click="toggleVisibility(d)" class="{{d.Status}}">{{moreOrLess(d)}} {{d.Name}}</span> [{{globalProgress(d) | number : 1}}%]
-        <div ng-show="visible[d.ID]">
+      <li ng-repeat="d in downs"> <span ng-click="toggleVisibility(d)" class="{{d.status}}">{{moreOrLess(d)}} {{d.Name}}</span> [{{globalProgress(d) | number : 1}}%]
+        <div ng-show="visible[d.id]">
           <ul>
-            <li><strong>Status:</strong> <span class="{{d.Status}}">{{d.Status}}</span></li>
+            <li><strong>Status:</strong> <span class="{{d.status}}">{{d.status}}</span></li>
             <li><strong>Errors</strong></li>
             <ul>
-              <li ng-repeat="e in d.Errors" class="item">{{e}}</li>
+              <li ng-repeat="e in d.errors" class="item">{{e}}</li>
             </ul>
-            <li><strong>Hooks:</strong> {{d.Posthook}}</li>
-            <li><strong>Destination:</strong> {{d.Destination}}</li>
+            <li><strong>Hooks:</strong> {{d.posthook}}</li>
+            <li><strong>Destination:</strong> {{d.destination}}</li>
             <li><strong>Links</strong></li>
             <ul>
-              <li ng-repeat="l in d.Links" class="item"><a href="{{l.URL}}" class="{{l.Status}}">{{l.URL}}</a> {{l.Percent | number : 1}}%</li>
+              <li ng-repeat="l in d.links" class="item"><a href="{{l.url}}" class="{{l.status}}">{{l.url}}</a> {{l.percent | number : 1}}%</li>
             </ul>
             <li><span class="WARNING" ng-click="delDownload(d)">DELETE</span></li>
           </ul>
