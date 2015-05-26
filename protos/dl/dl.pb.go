@@ -74,6 +74,7 @@ type Down struct {
 	CreatedAt   int64    `protobuf:"varint,7,opt,name=created_at" json:"created_at,omitempty"`
 	ModifiedAt  int64    `protobuf:"varint,8,opt,name=modified_at" json:"modified_at,omitempty"`
 	Links       []*Link  `protobuf:"bytes,9,rep,name=links" json:"links,omitempty"`
+	StatusText  string   `protobuf:"bytes,10,opt,name=status_text" json:"status_text,omitempty"`
 }
 
 func (m *Down) Reset()         { *m = Down{} }
@@ -95,6 +96,7 @@ type Link struct {
 	ModifiedAt int64   `protobuf:"varint,5,opt,name=modified_at" json:"modified_at,omitempty"`
 	Filename   string  `protobuf:"bytes,6,opt,name=filename" json:"filename,omitempty"`
 	Percent    float64 `protobuf:"fixed64,7,opt,name=percent" json:"percent,omitempty"`
+	StatusText string  `protobuf:"bytes,8,opt,name=status_text" json:"status_text,omitempty"`
 }
 
 func (m *Link) Reset()         { *m = Link{} }

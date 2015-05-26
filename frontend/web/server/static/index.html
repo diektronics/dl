@@ -30,10 +30,10 @@
     <h2>downloads</h2>
 
     <ul class="grey rounded-box">
-      <li ng-repeat="d in downs"> <span ng-click="toggleVisibility(d)" class="{{d.status}}">{{moreOrLess(d)}} {{d.Name}}</span> [{{globalProgress(d) | number : 1}}%]
+      <li ng-repeat="d in downs"> <span ng-click="toggleVisibility(d)" class="{{d.status_text}}">{{moreOrLess(d)}} {{d.name}}</span> [{{globalProgress(d) | number : 1}}%]
         <div ng-show="visible[d.id]">
           <ul>
-            <li><strong>Status:</strong> <span class="{{d.status}}">{{d.status}}</span></li>
+            <li><strong>Status:</strong> <span class="{{d.status_text}}">{{d.status_text}}</span></li>
             <li><strong>Errors</strong></li>
             <ul>
               <li ng-repeat="e in d.errors" class="item">{{e}}</li>
@@ -42,7 +42,7 @@
             <li><strong>Destination:</strong> {{d.destination}}</li>
             <li><strong>Links</strong></li>
             <ul>
-              <li ng-repeat="l in d.links" class="item"><a href="{{l.url}}" class="{{l.status}}">{{l.url}}</a> {{l.percent | number : 1}}%</li>
+              <li ng-repeat="l in d.links" class="item"><a href="{{l.url}}" class="{{l.status_text}}">{{l.url}}</a> {{l.percent | number : 1}}%</li>
             </ul>
             <li><span class="WARNING" ng-click="delDownload(d)">DELETE</span></li>
           </ul>

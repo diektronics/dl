@@ -31,6 +31,7 @@ message Down {
   int64 created_at = 7;
   int64 modified_at = 8;
   repeated Link links = 9;
+  string status_text = 10;
 }
 
 message Link {
@@ -41,6 +42,7 @@ message Link {
   int64 modified_at = 5;
   string filename = 6;
   double percent = 7;
+  string status_text = 8;
 }
 
 message DownloadRequest {

@@ -92,6 +92,12 @@ func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
+	for _, d := range reply.Downs {
+		d.StatusText = dlpb.Status_name[int32(d.Status)]
+		for _, l := range d.Links {
+			l.StatusText = dlpb.Status_name[int32(l.Status)]
+		}
+	}
 	res := struct{ Downs []*dlpb.Down }{reply.Downs}
 	return json.NewEncoder(w).Encode(res)
 }
