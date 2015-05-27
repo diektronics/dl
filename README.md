@@ -4,8 +4,10 @@
 TODO
 ====
 * Use user certificates for multiuser support
-* Substitute net/rpc with grpc.
 
+DONE v3.0
+=========
+* Using grpc for both RPCs and configuration.
 
 DONE v2.5
 =========
