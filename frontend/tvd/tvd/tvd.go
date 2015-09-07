@@ -61,7 +61,7 @@ func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
 		return timestamp, fmt.Errorf("getLinks: %v", err)
 	}
 
-	conn, err := grpc.Dial(dm.backend)
+	conn, err := grpc.Dial(dm.backend, grpc.WithInsecure())
 	if err != nil {
 		return timestamp, fmt.Errorf("dialing: %v", err)
 	}

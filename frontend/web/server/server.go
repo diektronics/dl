@@ -81,7 +81,7 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 }
 
 func (s *Server) listDowns(w http.ResponseWriter, r *http.Request) error {
-	conn, err := grpc.Dial(s.backend)
+	conn, err := grpc.Dial(s.backend, grpc.WithInsecure())
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
@@ -132,7 +132,7 @@ func (s *Server) newDown(w http.ResponseWriter, r *http.Request) error {
 	if len(down.Name) == 0 || len(down.Links) == 0 {
 		return badRequest{errors.New("please provide a name and links to download")}
 	}
-	conn, err := grpc.Dial(s.backend)
+	conn, err := grpc.Dial(s.backend, grpc.WithInsecure())
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
@@ -151,7 +151,7 @@ func (s *Server) getDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
-	conn, err := grpc.Dial(s.backend)
+	conn, err := grpc.Dial(s.backend, grpc.WithInsecure())
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
@@ -170,7 +170,7 @@ func (s *Server) letDown(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return badRequest{err}
 	}
-	conn, err := grpc.Dial(s.backend)
+	conn, err := grpc.Dial(s.backend, grpc.WithInsecure())
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
@@ -196,7 +196,7 @@ func parseID(r *http.Request) (int64, error) {
 }
 
 func (s *Server) listHooks(w http.ResponseWriter, r *http.Request) error {
-	conn, err := grpc.Dial(s.backend)
+	conn, err := grpc.Dial(s.backend, grpc.WithInsecure())
 	if err != nil {
 		log.Println("dialing:", err)
 		return err
