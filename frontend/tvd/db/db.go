@@ -21,10 +21,10 @@ type Db struct {
 	connectionString string
 }
 
-func New(c *cfg.Configuration) *Db {
+func New(c *cfg.Config) *Db {
 	return &Db{
 		connectionString: fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local",
-			c.DbUser, c.DbPassword, c.DbServer, c.DbDatabase),
+			c.Db.User, c.Db.Password, c.Db.Server, c.Db.Database),
 	}
 }
 

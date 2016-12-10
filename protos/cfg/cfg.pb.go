@@ -9,7 +9,7 @@ It is generated from these files:
 	cfg.proto
 
 It has these top-level messages:
-	Configuration
+	Config
 */
 package cfg
 
@@ -18,28 +18,103 @@ import proto "github.com/golang/protobuf/proto"
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 
-type Configuration struct {
-	DbUser        string `protobuf:"bytes,1,opt,name=db_user" json:"db_user,omitempty"`
-	DbServer      string `protobuf:"bytes,2,opt,name=db_server" json:"db_server,omitempty"`
-	DbPassword    string `protobuf:"bytes,3,opt,name=db_password" json:"db_password,omitempty"`
-	DbDatabase    string `protobuf:"bytes,4,opt,name=db_database" json:"db_database,omitempty"`
-	MailAddr      string `protobuf:"bytes,5,opt,name=mail_addr" json:"mail_addr,omitempty"`
-	MailPort      int32  `protobuf:"varint,6,opt,name=mail_port" json:"mail_port,omitempty"`
-	MailRecipient string `protobuf:"bytes,7,opt,name=mail_recipient" json:"mail_recipient,omitempty"`
-	MailSender    string `protobuf:"bytes,8,opt,name=mail_sender" json:"mail_sender,omitempty"`
-	MailPassword  string `protobuf:"bytes,9,opt,name=mail_password" json:"mail_password,omitempty"`
-	DownloadDir   string `protobuf:"bytes,10,opt,name=download_dir" json:"download_dir,omitempty"`
-	PlowdownPath  string `protobuf:"bytes,11,opt,name=plowdown_path" json:"plowdown_path,omitempty"`
-	PlowprobePath string `protobuf:"bytes,12,opt,name=plowprobe_path" json:"plowprobe_path,omitempty"`
-	HttpPort      int32  `protobuf:"varint,13,opt,name=http_port" json:"http_port,omitempty"`
-	BackendPort   int32  `protobuf:"varint,14,opt,name=backend_port" json:"backend_port,omitempty"`
-	LinkRegexp    string `protobuf:"bytes,15,opt,name=link_regexp" json:"link_regexp,omitempty"`
-	Feed          string `protobuf:"bytes,16,opt,name=feed" json:"feed,omitempty"`
+type Config struct {
+	Db       *Config_Db       `protobuf:"bytes,1,opt,name=db" json:"db,omitempty"`
+	Mail     *Config_Mail     `protobuf:"bytes,2,opt,name=mail" json:"mail,omitempty"`
+	Download *Config_Download `protobuf:"bytes,3,opt,name=download" json:"download,omitempty"`
+	Backend  *Config_Backend  `protobuf:"bytes,4,opt,name=backend" json:"backend,omitempty"`
+	Web      *Config_Web      `protobuf:"bytes,5,opt,name=web" json:"web,omitempty"`
 }
 
-func (m *Configuration) Reset()         { *m = Configuration{} }
-func (m *Configuration) String() string { return proto.CompactTextString(m) }
-func (*Configuration) ProtoMessage()    {}
+func (m *Config) Reset()         { *m = Config{} }
+func (m *Config) String() string { return proto.CompactTextString(m) }
+func (*Config) ProtoMessage()    {}
+
+func (m *Config) GetDb() *Config_Db {
+	if m != nil {
+		return m.Db
+	}
+	return nil
+}
+
+func (m *Config) GetMail() *Config_Mail {
+	if m != nil {
+		return m.Mail
+	}
+	return nil
+}
+
+func (m *Config) GetDownload() *Config_Download {
+	if m != nil {
+		return m.Download
+	}
+	return nil
+}
+
+func (m *Config) GetBackend() *Config_Backend {
+	if m != nil {
+		return m.Backend
+	}
+	return nil
+}
+
+func (m *Config) GetWeb() *Config_Web {
+	if m != nil {
+		return m.Web
+	}
+	return nil
+}
+
+type Config_Db struct {
+	User     string `protobuf:"bytes,1,opt,name=user" json:"user,omitempty"`
+	Server   string `protobuf:"bytes,2,opt,name=server" json:"server,omitempty"`
+	Password string `protobuf:"bytes,3,opt,name=password" json:"password,omitempty"`
+	Database string `protobuf:"bytes,4,opt,name=database" json:"database,omitempty"`
+}
+
+func (m *Config_Db) Reset()         { *m = Config_Db{} }
+func (m *Config_Db) String() string { return proto.CompactTextString(m) }
+func (*Config_Db) ProtoMessage()    {}
+
+type Config_Mail struct {
+	Addr      string `protobuf:"bytes,1,opt,name=addr" json:"addr,omitempty"`
+	Port      int32  `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
+	Recipient string `protobuf:"bytes,3,opt,name=recipient" json:"recipient,omitempty"`
+	Sender    string `protobuf:"bytes,4,opt,name=sender" json:"sender,omitempty"`
+	Password  string `protobuf:"bytes,5,opt,name=password" json:"password,omitempty"`
+}
+
+func (m *Config_Mail) Reset()         { *m = Config_Mail{} }
+func (m *Config_Mail) String() string { return proto.CompactTextString(m) }
+func (*Config_Mail) ProtoMessage()    {}
+
+type Config_Download struct {
+	Dir           string `protobuf:"bytes,1,opt,name=dir" json:"dir,omitempty"`
+	PlowdownPath  string `protobuf:"bytes,2,opt,name=plowdown_path" json:"plowdown_path,omitempty"`
+	PlowprobePath string `protobuf:"bytes,3,opt,name=plowprobe_path" json:"plowprobe_path,omitempty"`
+	LinkRegexp    string `protobuf:"bytes,4,opt,name=link_regexp" json:"link_regexp,omitempty"`
+	Feed          string `protobuf:"bytes,5,opt,name=feed" json:"feed,omitempty"`
+}
+
+func (m *Config_Download) Reset()         { *m = Config_Download{} }
+func (m *Config_Download) String() string { return proto.CompactTextString(m) }
+func (*Config_Download) ProtoMessage()    {}
+
+type Config_Backend struct {
+	Port int32 `protobuf:"varint,1,opt,name=port" json:"port,omitempty"`
+}
+
+func (m *Config_Backend) Reset()         { *m = Config_Backend{} }
+func (m *Config_Backend) String() string { return proto.CompactTextString(m) }
+func (*Config_Backend) ProtoMessage()    {}
+
+type Config_Web struct {
+	Port int32 `protobuf:"varint,1,opt,name=port" json:"port,omitempty"`
+}
+
+func (m *Config_Web) Reset()         { *m = Config_Web{} }
+func (m *Config_Web) String() string { return proto.CompactTextString(m) }
+func (*Config_Web) ProtoMessage()    {}
 
 func init() {
 }

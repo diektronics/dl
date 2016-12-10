@@ -2,21 +2,41 @@ syntax = "proto3";
 
 package cfg;
 
-message Configuration {
-	string db_user = 1;
-	string db_server = 2;
-	string db_password = 3;
-	string db_database = 4;
-	string mail_addr = 5;
-	int32 mail_port = 6;
-	string mail_recipient = 7;
-	string mail_sender = 8;
-	string mail_password = 9;
-	string download_dir = 10;
-	string plowdown_path = 11;
-	string plowprobe_path = 12;
-	int32 http_port = 13;
-	int32 backend_port = 14;
-	string link_regexp = 15;
-	string feed = 16;
+message Config {
+	message Db {
+		string user = 1;
+		string server = 2;
+		string password = 3;
+		string database = 4;
+	}
+
+	message Mail {
+		string addr = 1;
+		int32 port = 2;
+		string recipient = 3;
+		string sender = 4;
+		string password = 5;
+	}
+
+	message Download {
+		string dir = 1;
+		string plowdown_path = 2;
+		string plowprobe_path = 3;
+		string link_regexp = 4;
+		string feed = 5;
+	}
+
+	message Backend {
+		int32 port = 1;
+	}
+
+	message Web {
+		int32 port = 1;
+	}
+
+	Db db = 1;
+	Mail mail = 2;
+	Download download = 3;
+	Backend backend = 4;
+	Web web = 5;
 }

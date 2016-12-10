@@ -16,14 +16,14 @@ import (
 )
 
 type Datamanager struct {
-	c       *cfg.Configuration
+	c       *cfg.Config
 	backend string
 }
 
-func New(c *cfg.Configuration) *Datamanager {
+func New(c *cfg.Config) *Datamanager {
 	return &Datamanager{
 		c:       c,
-		backend: fmt.Sprintf("localhost:%v", c.BackendPort),
+		backend: fmt.Sprintf("localhost:%v", c.Backend.Port),
 	}
 }
 
@@ -45,7 +45,7 @@ func (dm *Datamanager) worker(t time.Duration) {
 }
 
 func (dm *Datamanager) doer(timestamp time.Time) (time.Time, error) {
-	shows, newTimestamp, err := feed.ScrapeShows(dm.c.Feed)
+	shows, newTimestamp, err := feed.ScrapeShows(dm.c.Download.Feed)
 	if err != nil {
 		return timestamp, fmt.Errorf("scrapeShows: %v", err)
 	}
@@ -115,7 +115,7 @@ func (dm *Datamanager) selectMyShows(shows []*show.Show) ([]*show.Show, error) {
 func (dm *Datamanager) getLinks(shows []*show.Show) ([]*show.Show, error) {
 	toDown := []*show.Show{}
 	for _, s := range shows {
-		if link := feed.Link(dm.c.LinkRegexp, s); len(link) > 0 {
+		if link := feed.Link(dm.c.Download.LinkRegexp, s); len(link) > 0 {
 			s.Down.Links = append(s.Down.Links, &dlpb.Link{Url: link})
 			toDown = append(toDown, s)
 		}

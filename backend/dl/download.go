@@ -88,7 +88,7 @@ func (d *Downloader) applyHook(hookName string, files []string, down *dlpb.Down)
 	return nil
 }
 
-func (d *Downloader) worker(i int, c *cfg.Configuration) {
+func (d *Downloader) worker(i int, c *cfg.Config) {
 	log.Println("download:", i, "ready for action")
 
 	for l := range d.q {
@@ -105,7 +105,7 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 			continue
 		}
 		log.Printf("download: %d getting %q into %q\n", i, l.l.Url, l.destination)
-		cmd := []string{c.PlowprobePath,
+		cmd := []string{c.Download.PlowprobePath,
 			"--printf=%f%t%s%n",
 			l.l.Url}
 		output, err := exec.Command((cmd[0]), cmd[1:]...).CombinedOutput()
@@ -123,7 +123,7 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 		monitorDone := make(chan struct{})
 		go d.sizeMonitor(fileName+".part", fileSize, l.l, done, monitorDone)
 
-		cmd = []string{c.PlowdownPath,
+		cmd = []string{c.Download.PlowdownPath,
 			//"--engine=xfilesharing",
 			"--output-directory=" + l.destination,
 			"--printf=%F",
