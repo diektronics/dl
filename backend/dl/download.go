@@ -117,7 +117,20 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 			continue
 		}
 		parts := strings.Fields(strings.TrimSpace(string(output)))
-		fileSize, _ := strconv.ParseInt(parts[len(parts)-1], 10, 64)
+		var fileSize int64 = 0
+		for len(parts) > 1 {
+			fileSize, err = strconv.ParseInt(parts[len(parts)-1], 10, 64)
+                        if err == nil && fileSize != 0 {
+				break;
+			}
+			parts = parts[:len(parts)-1]
+		}
+		if len(parts) < 2 {
+			log.Println("download:", i, "err: bad probe output:", string(output))
+			l.l.Status = dlpb.Status_ERROR
+                        l.ch <- l.l
+                        continue
+		}
 		fileName := filepath.Join(l.destination, strings.Join(parts[:len(parts)-1], " "))
 		done := make(chan struct{})
 		monitorDone := make(chan struct{})
@@ -138,8 +151,7 @@ func (d *Downloader) worker(i int, c *cfg.Configuration) {
 			log.Println("download:", i, "output:", string(output))
 			l.l.Status = dlpb.Status_ERROR
 		} else {
-			parts = strings.Split(strings.TrimSpace(string(output)), "\n")
-			l.l.Filename = parts[len(parts)-1]
+			l.l.Filename = fileName
 			log.Println("download:", i, l.l.Url, "download complete")
 			l.l.Status = dlpb.Status_SUCCESS
 			l.l.Percent = 100.0

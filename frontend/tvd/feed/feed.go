@@ -26,10 +26,10 @@ type item struct {
 
 func Link(linkRegexp string, show *show.Show) string {
 	titleEps := []string{
-		fmt.Sprintf("%s\\.%s\\.720p.*\\.mkv",
+		fmt.Sprintf("%s\\.%s\\.720p[\\w-\\.]*\\.mkv",
 			strings.ToLower(strings.Replace(deparenthesize(show.Name), " ", "\\.", -1)),
 			strings.ToLower(show.Eps)),
-		fmt.Sprintf(".*\\.%s\\.720p.*\\.mkv",
+		fmt.Sprintf(".*\\.%s\\.720p[\\w-\\.]*\\.mkv",
 			strings.ToLower(show.Eps))}
 	for _, titleEp := range titleEps {
 		reStr := "(?i)(?P<link>" + linkRegexp + titleEp + ")"
