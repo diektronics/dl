@@ -27,10 +27,10 @@ type Server struct {
 	backend string
 }
 
-func New(c *cfg.Configuration) *Server {
+func New(c *cfg.Config) *Server {
 	return &Server{
-		port:    c.HttpPort,
-		backend: fmt.Sprintf("localhost:%v", c.BackendPort),
+		port:    c.Web.Port,
+		backend: fmt.Sprintf("localhost:%v", c.Backend.Port),
 	}
 }
 

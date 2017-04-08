@@ -9,7 +9,7 @@ It is generated from these files:
 	cfg.proto
 
 It has these top-level messages:
-	Configuration
+	Config
 */
 package cfg
 
@@ -28,165 +28,253 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type Configuration struct {
-	DbUser        string `protobuf:"bytes,1,opt,name=db_user" json:"db_user,omitempty"`
-	DbServer      string `protobuf:"bytes,2,opt,name=db_server" json:"db_server,omitempty"`
-	DbPassword    string `protobuf:"bytes,3,opt,name=db_password" json:"db_password,omitempty"`
-	DbDatabase    string `protobuf:"bytes,4,opt,name=db_database" json:"db_database,omitempty"`
-	MailAddr      string `protobuf:"bytes,5,opt,name=mail_addr" json:"mail_addr,omitempty"`
-	MailPort      int32  `protobuf:"varint,6,opt,name=mail_port" json:"mail_port,omitempty"`
-	MailRecipient string `protobuf:"bytes,7,opt,name=mail_recipient" json:"mail_recipient,omitempty"`
-	MailSender    string `protobuf:"bytes,8,opt,name=mail_sender" json:"mail_sender,omitempty"`
-	MailPassword  string `protobuf:"bytes,9,opt,name=mail_password" json:"mail_password,omitempty"`
-	DownloadDir   string `protobuf:"bytes,10,opt,name=download_dir" json:"download_dir,omitempty"`
-	PlowdownPath  string `protobuf:"bytes,11,opt,name=plowdown_path" json:"plowdown_path,omitempty"`
-	PlowprobePath string `protobuf:"bytes,12,opt,name=plowprobe_path" json:"plowprobe_path,omitempty"`
-	HttpPort      int32  `protobuf:"varint,13,opt,name=http_port" json:"http_port,omitempty"`
-	BackendPort   int32  `protobuf:"varint,14,opt,name=backend_port" json:"backend_port,omitempty"`
-	LinkRegexp    string `protobuf:"bytes,15,opt,name=link_regexp" json:"link_regexp,omitempty"`
-	Feed          string `protobuf:"bytes,16,opt,name=feed" json:"feed,omitempty"`
+type Config struct {
+	Db       *Config_Db       `protobuf:"bytes,1,opt,name=db" json:"db,omitempty"`
+	Mail     *Config_Mail     `protobuf:"bytes,2,opt,name=mail" json:"mail,omitempty"`
+	Download *Config_Download `protobuf:"bytes,3,opt,name=download" json:"download,omitempty"`
+	Backend  *Config_Backend  `protobuf:"bytes,4,opt,name=backend" json:"backend,omitempty"`
+	Web      *Config_Web      `protobuf:"bytes,5,opt,name=web" json:"web,omitempty"`
 }
 
-func (m *Configuration) Reset()                    { *m = Configuration{} }
-func (m *Configuration) String() string            { return proto.CompactTextString(m) }
-func (*Configuration) ProtoMessage()               {}
-func (*Configuration) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (m *Config) Reset()                    { *m = Config{} }
+func (m *Config) String() string            { return proto.CompactTextString(m) }
+func (*Config) ProtoMessage()               {}
+func (*Config) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *Configuration) GetDbUser() string {
+func (m *Config) GetDb() *Config_Db {
 	if m != nil {
-		return m.DbUser
+		return m.Db
+	}
+	return nil
+}
+
+func (m *Config) GetMail() *Config_Mail {
+	if m != nil {
+		return m.Mail
+	}
+	return nil
+}
+
+func (m *Config) GetDownload() *Config_Download {
+	if m != nil {
+		return m.Download
+	}
+	return nil
+}
+
+func (m *Config) GetBackend() *Config_Backend {
+	if m != nil {
+		return m.Backend
+	}
+	return nil
+}
+
+func (m *Config) GetWeb() *Config_Web {
+	if m != nil {
+		return m.Web
+	}
+	return nil
+}
+
+type Config_Db struct {
+	User     string `protobuf:"bytes,1,opt,name=user" json:"user,omitempty"`
+	Server   string `protobuf:"bytes,2,opt,name=server" json:"server,omitempty"`
+	Password string `protobuf:"bytes,3,opt,name=password" json:"password,omitempty"`
+	Database string `protobuf:"bytes,4,opt,name=database" json:"database,omitempty"`
+}
+
+func (m *Config_Db) Reset()                    { *m = Config_Db{} }
+func (m *Config_Db) String() string            { return proto.CompactTextString(m) }
+func (*Config_Db) ProtoMessage()               {}
+func (*Config_Db) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0, 0} }
+
+func (m *Config_Db) GetUser() string {
+	if m != nil {
+		return m.User
 	}
 	return ""
 }
 
-func (m *Configuration) GetDbServer() string {
+func (m *Config_Db) GetServer() string {
 	if m != nil {
-		return m.DbServer
+		return m.Server
 	}
 	return ""
 }
 
-func (m *Configuration) GetDbPassword() string {
+func (m *Config_Db) GetPassword() string {
 	if m != nil {
-		return m.DbPassword
+		return m.Password
 	}
 	return ""
 }
 
-func (m *Configuration) GetDbDatabase() string {
+func (m *Config_Db) GetDatabase() string {
 	if m != nil {
-		return m.DbDatabase
+		return m.Database
 	}
 	return ""
 }
 
-func (m *Configuration) GetMailAddr() string {
+type Config_Mail struct {
+	Addr      string `protobuf:"bytes,1,opt,name=addr" json:"addr,omitempty"`
+	Port      int32  `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
+	Recipient string `protobuf:"bytes,3,opt,name=recipient" json:"recipient,omitempty"`
+	Sender    string `protobuf:"bytes,4,opt,name=sender" json:"sender,omitempty"`
+	Password  string `protobuf:"bytes,5,opt,name=password" json:"password,omitempty"`
+}
+
+func (m *Config_Mail) Reset()                    { *m = Config_Mail{} }
+func (m *Config_Mail) String() string            { return proto.CompactTextString(m) }
+func (*Config_Mail) ProtoMessage()               {}
+func (*Config_Mail) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0, 1} }
+
+func (m *Config_Mail) GetAddr() string {
 	if m != nil {
-		return m.MailAddr
+		return m.Addr
 	}
 	return ""
 }
 
-func (m *Configuration) GetMailPort() int32 {
+func (m *Config_Mail) GetPort() int32 {
 	if m != nil {
-		return m.MailPort
+		return m.Port
 	}
 	return 0
 }
 
-func (m *Configuration) GetMailRecipient() string {
+func (m *Config_Mail) GetRecipient() string {
 	if m != nil {
-		return m.MailRecipient
+		return m.Recipient
 	}
 	return ""
 }
 
-func (m *Configuration) GetMailSender() string {
+func (m *Config_Mail) GetSender() string {
 	if m != nil {
-		return m.MailSender
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *Configuration) GetMailPassword() string {
+func (m *Config_Mail) GetPassword() string {
 	if m != nil {
-		return m.MailPassword
+		return m.Password
 	}
 	return ""
 }
 
-func (m *Configuration) GetDownloadDir() string {
+type Config_Download struct {
+	Dir           string `protobuf:"bytes,1,opt,name=dir" json:"dir,omitempty"`
+	PlowdownPath  string `protobuf:"bytes,2,opt,name=plowdown_path" json:"plowdown_path,omitempty"`
+	PlowprobePath string `protobuf:"bytes,3,opt,name=plowprobe_path" json:"plowprobe_path,omitempty"`
+	LinkRegexp    string `protobuf:"bytes,4,opt,name=link_regexp" json:"link_regexp,omitempty"`
+	Feed          string `protobuf:"bytes,5,opt,name=feed" json:"feed,omitempty"`
+}
+
+func (m *Config_Download) Reset()                    { *m = Config_Download{} }
+func (m *Config_Download) String() string            { return proto.CompactTextString(m) }
+func (*Config_Download) ProtoMessage()               {}
+func (*Config_Download) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0, 2} }
+
+func (m *Config_Download) GetDir() string {
 	if m != nil {
-		return m.DownloadDir
+		return m.Dir
 	}
 	return ""
 }
 
-func (m *Configuration) GetPlowdownPath() string {
+func (m *Config_Download) GetPlowdownPath() string {
 	if m != nil {
 		return m.PlowdownPath
 	}
 	return ""
 }
 
-func (m *Configuration) GetPlowprobePath() string {
+func (m *Config_Download) GetPlowprobePath() string {
 	if m != nil {
 		return m.PlowprobePath
 	}
 	return ""
 }
 
-func (m *Configuration) GetHttpPort() int32 {
-	if m != nil {
-		return m.HttpPort
-	}
-	return 0
-}
-
-func (m *Configuration) GetBackendPort() int32 {
-	if m != nil {
-		return m.BackendPort
-	}
-	return 0
-}
-
-func (m *Configuration) GetLinkRegexp() string {
+func (m *Config_Download) GetLinkRegexp() string {
 	if m != nil {
 		return m.LinkRegexp
 	}
 	return ""
 }
 
-func (m *Configuration) GetFeed() string {
+func (m *Config_Download) GetFeed() string {
 	if m != nil {
 		return m.Feed
 	}
 	return ""
 }
 
+type Config_Backend struct {
+	Port int32 `protobuf:"varint,1,opt,name=port" json:"port,omitempty"`
+}
+
+func (m *Config_Backend) Reset()                    { *m = Config_Backend{} }
+func (m *Config_Backend) String() string            { return proto.CompactTextString(m) }
+func (*Config_Backend) ProtoMessage()               {}
+func (*Config_Backend) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0, 3} }
+
+func (m *Config_Backend) GetPort() int32 {
+	if m != nil {
+		return m.Port
+	}
+	return 0
+}
+
+type Config_Web struct {
+	Port int32 `protobuf:"varint,1,opt,name=port" json:"port,omitempty"`
+}
+
+func (m *Config_Web) Reset()                    { *m = Config_Web{} }
+func (m *Config_Web) String() string            { return proto.CompactTextString(m) }
+func (*Config_Web) ProtoMessage()               {}
+func (*Config_Web) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0, 4} }
+
+func (m *Config_Web) GetPort() int32 {
+	if m != nil {
+		return m.Port
+	}
+	return 0
+}
+
 func init() {
-	proto.RegisterType((*Configuration)(nil), "cfg.Configuration")
+	proto.RegisterType((*Config)(nil), "cfg.Config")
+	proto.RegisterType((*Config_Db)(nil), "cfg.Config.Db")
+	proto.RegisterType((*Config_Mail)(nil), "cfg.Config.Mail")
+	proto.RegisterType((*Config_Download)(nil), "cfg.Config.Download")
+	proto.RegisterType((*Config_Backend)(nil), "cfg.Config.Backend")
+	proto.RegisterType((*Config_Web)(nil), "cfg.Config.Web")
 }
 
 func init() { proto.RegisterFile("cfg.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 258 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0xd0, 0x4f, 0x6e, 0xeb, 0x20,
-	0x10, 0x06, 0x70, 0xe5, 0xff, 0xf3, 0xc4, 0x49, 0x5e, 0x9d, 0x34, 0x9a, 0x65, 0xd4, 0x55, 0x56,
-	0xdd, 0xf4, 0x08, 0x3d, 0x08, 0x02, 0xcf, 0xd8, 0x41, 0x71, 0x01, 0x0d, 0xa4, 0xee, 0x51, 0x7b,
-	0x9c, 0xca, 0x58, 0x96, 0xda, 0x25, 0x3f, 0xf8, 0x98, 0x4f, 0x03, 0x45, 0xdd, 0xb4, 0xaf, 0x41,
-	0x7c, 0xf2, 0xd5, 0xa2, 0x6e, 0xda, 0x97, 0xef, 0x39, 0xec, 0xde, 0xbd, 0x6b, 0x6c, 0xfb, 0x10,
-	0x9d, 0xac, 0x77, 0xd5, 0x01, 0x36, 0x64, 0xd4, 0x23, 0xb2, 0xe0, 0xec, 0x32, 0xbb, 0x16, 0xd5,
-	0x13, 0x14, 0x64, 0x54, 0x64, 0xf9, 0x64, 0xc1, 0x79, 0xa6, 0x23, 0x6c, 0xc9, 0xa8, 0xa0, 0x63,
-	0xec, 0xbd, 0x10, 0x2e, 0x7e, 0x21, 0xe9, 0xa4, 0x8d, 0x8e, 0x8c, 0xcb, 0x29, 0xfc, 0xa1, 0x6d,
-	0xa7, 0x34, 0x91, 0xe0, 0xea, 0x0f, 0x05, 0x2f, 0x09, 0xd7, 0x97, 0xd9, 0x75, 0x55, 0x9d, 0x61,
-	0x9f, 0x49, 0xb8, 0xb6, 0xc1, 0xb2, 0x4b, 0xb8, 0x99, 0xbe, 0xcc, 0x1e, 0xd9, 0x11, 0x0b, 0xfe,
-	0xcb, 0xf8, 0x0c, 0xbb, 0x31, 0x3f, 0x8d, 0x2f, 0x32, 0x9f, 0xa0, 0x24, 0xdf, 0xbb, 0xce, 0x6b,
-	0x52, 0x64, 0x05, 0x61, 0x7a, 0x1c, 0x3a, 0xdf, 0x0f, 0x37, 0x2a, 0xe8, 0x74, 0xc3, 0x6d, 0xe6,
-	0x33, 0xec, 0x07, 0x0e, 0xe2, 0x0d, 0x8f, 0x5e, 0x4e, 0xdd, 0x6e, 0x29, 0x85, 0xb1, 0xdb, 0x2e,
-	0x77, 0x3b, 0x41, 0x69, 0x74, 0x7d, 0x67, 0x47, 0xa3, 0xee, 0xb3, 0x1e, 0x61, 0xdb, 0x59, 0x77,
-	0x57, 0xc2, 0x2d, 0x7f, 0x05, 0x3c, 0xe4, 0x74, 0x09, 0xcb, 0x86, 0x99, 0xf0, 0xff, 0x70, 0x32,
-	0xeb, 0xbc, 0xe6, 0xb7, 0x9f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xd5, 0xb0, 0xf6, 0xc8, 0x73, 0x01,
-	0x00, 0x00,
+	// 318 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0x91, 0xcd, 0x4e, 0xc3, 0x30,
+	0x10, 0x84, 0xd5, 0xc6, 0x69, 0x9b, 0x6d, 0x28, 0xc5, 0xe5, 0x27, 0x8a, 0x10, 0x42, 0x08, 0x21,
+	0x4e, 0x3d, 0xc0, 0x1b, 0x40, 0xc5, 0x8d, 0x73, 0x8f, 0x95, 0x1d, 0x6f, 0x82, 0xd5, 0x10, 0x5b,
+	0x4e, 0x20, 0x3c, 0x33, 0x4f, 0x81, 0xb2, 0x4e, 0x50, 0x7b, 0x9d, 0x19, 0xcd, 0x37, 0x5e, 0x43,
+	0x94, 0xe5, 0xc5, 0xda, 0x3a, 0xd3, 0x18, 0x1e, 0x64, 0x79, 0x71, 0xf7, 0x1b, 0xc0, 0xe4, 0xd5,
+	0x54, 0xb9, 0x2e, 0x78, 0x0a, 0x63, 0x25, 0x93, 0xd1, 0xed, 0xe8, 0x71, 0xfe, 0xb4, 0x58, 0x77,
+	0x39, 0x6f, 0xac, 0x37, 0x92, 0xdf, 0x00, 0xfb, 0x14, 0xba, 0x4c, 0xc6, 0xe4, 0x2e, 0x0f, 0xdd,
+	0x77, 0xa1, 0x4b, 0xfe, 0x00, 0x33, 0x65, 0xda, 0xaa, 0x34, 0x42, 0x25, 0x01, 0x65, 0xce, 0x8f,
+	0x1a, 0x7a, 0x8f, 0xdf, 0xc3, 0x54, 0x8a, 0x6c, 0x8f, 0x95, 0x4a, 0x18, 0xc5, 0x56, 0x87, 0xb1,
+	0x17, 0x6f, 0xf1, 0x6b, 0x08, 0x5a, 0x94, 0x49, 0x48, 0x89, 0xd3, 0xc3, 0xc4, 0x16, 0x65, 0xfa,
+	0x06, 0xe3, 0x8d, 0xe4, 0x31, 0xb0, 0xaf, 0x1a, 0x1d, 0xed, 0x8d, 0xf8, 0x02, 0x26, 0x35, 0xba,
+	0x6f, 0x74, 0xb4, 0x30, 0xe2, 0x4b, 0x98, 0x59, 0x51, 0xd7, 0xad, 0x71, 0x7e, 0x0f, 0x29, 0x4a,
+	0x34, 0x42, 0x8a, 0x1a, 0x09, 0x1d, 0xa5, 0x5b, 0x60, 0xb4, 0x3d, 0x06, 0x26, 0x94, 0x1a, 0x9a,
+	0x62, 0x60, 0xd6, 0xb8, 0x86, 0x7a, 0x42, 0x7e, 0x06, 0x91, 0xc3, 0x4c, 0x5b, 0x8d, 0x55, 0xd3,
+	0x17, 0x11, 0xaa, 0x52, 0xe8, 0x7c, 0xcd, 0x11, 0x2a, 0xa4, 0x62, 0x0d, 0xb3, 0xff, 0x07, 0xcf,
+	0x21, 0x50, 0x7a, 0xe8, 0xbe, 0x80, 0x13, 0x5b, 0x9a, 0xb6, 0xbb, 0xd4, 0xce, 0x8a, 0xe6, 0xa3,
+	0x1f, 0x7b, 0x09, 0x8b, 0x4e, 0xb6, 0xce, 0x48, 0xf4, 0xba, 0x27, 0xad, 0x60, 0x5e, 0xea, 0x6a,
+	0xbf, 0x73, 0x58, 0xe0, 0x8f, 0xed, 0x71, 0x31, 0xb0, 0x1c, 0x71, 0x40, 0x5d, 0xc1, 0x74, 0x38,
+	0xda, 0x30, 0xbc, 0x43, 0x85, 0xe9, 0x0a, 0x82, 0x2d, 0xca, 0x63, 0x51, 0x4e, 0xe8, 0xe3, 0x9f,
+	0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x16, 0xc6, 0x3e, 0xf2, 0x05, 0x02, 0x00, 0x00,
 }

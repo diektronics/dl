@@ -32,7 +32,7 @@ func main() {
 	d := dl.New(c, 5)
 	s := grpc.NewServer()
 	dlpb.RegisterDlServer(s, d)
-	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", c.BackendPort))
+	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", c.Backend.Port))
 	if err != nil {
 		log.Fatal("listening:", err)
 	}

@@ -30,12 +30,12 @@ type link struct {
 
 // New returns a pointer to Downloader provided a configuration and the number of workers
 // to use.
-func New(c *cfg.Configuration, nWorkers int) *Downloader {
+func New(c *cfg.Config, nWorkers int) *Downloader {
 	d := &Downloader{
 		q:          make(chan *link, 1000),
 		db:         db.New(c),
 		n:          notifier.New(c),
-		defaultDir: c.DownloadDir,
+		defaultDir: c.Download.Dir,
 	}
 	for i := 0; i < nWorkers; i++ {
 		go d.worker(i, c)

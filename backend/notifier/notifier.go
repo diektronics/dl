@@ -19,13 +19,13 @@ type Client struct {
 	password  string
 }
 
-func New(c *cfg.Configuration) *Client {
+func New(c *cfg.Config) *Client {
 	return &Client{
-		addr:      c.MailAddr,
-		port:      c.MailPort,
-		recipient: c.MailRecipient,
-		sender:    c.MailSender,
-		password:  c.MailPassword,
+		addr:      c.Mail.Addr,
+		port:      c.Mail.Port,
+		recipient: c.Mail.Recipient,
+		sender:    c.Mail.Sender,
+		password:  c.Mail.Password,
 	}
 }
 

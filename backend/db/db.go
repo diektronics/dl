@@ -15,14 +15,14 @@ import (
 )
 
 type Db struct {
-	connectionString string
-	q                chan proto.Message
+	connStr string
+	q       chan proto.Message
 }
 
-func New(c *cfg.Configuration) *Db {
+func New(c *cfg.Config) *Db {
 	d := &Db{
-		connectionString: fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local",
-			c.DbUser, c.DbPassword, c.DbServer, c.DbDatabase),
+		connStr: fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local",
+			c.Db.User, c.Db.Password, c.Db.Server, c.Db.Database),
 		q: make(chan proto.Message, 1000),
 	}
 	go d.worker(0)
@@ -31,7 +31,7 @@ func New(c *cfg.Configuration) *Db {
 }
 
 func (d *Db) Add(down *dlpb.Down) (int64, error) {
-	db, err := sql.Open("mysql", d.connectionString)
+	db, err := sql.Open("mysql", d.connStr)
 	if err != nil {
 		return 0, err
 	}
@@ -83,7 +83,7 @@ func (d *Db) Add(down *dlpb.Down) (int64, error) {
 }
 
 func (d *Db) Get(id int64) (*dlpb.Down, error) {
-	db, err := sql.Open("mysql", d.connectionString)
+	db, err := sql.Open("mysql", d.connStr)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func allStatuses() []dlpb.Status {
 }
 
 func (d *Db) GetAll(statuses []dlpb.Status) ([]*dlpb.Down, error) {
-	db, err := sql.Open("mysql", d.connectionString)
+	db, err := sql.Open("mysql", d.connStr)
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func (d *Db) GetAll(statuses []dlpb.Status) ([]*dlpb.Down, error) {
 }
 
 func (d *Db) Del(down *dlpb.Down) error {
-	db, err := sql.Open("mysql", d.connectionString)
+	db, err := sql.Open("mysql", d.connStr)
 	if err != nil {
 		return err
 	}
@@ -280,7 +280,7 @@ func (d *Db) Update(data proto.Message) error {
 }
 
 func (d *Db) QueueRunning() ([]*dlpb.Down, error) {
-	db, err := sql.Open("mysql", d.connectionString)
+	db, err := sql.Open("mysql", d.connStr)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +312,7 @@ func (d *Db) QueueRunning() ([]*dlpb.Down, error) {
 func (d *Db) worker(i int) {
 	log.Println("db:", i, "ready for action")
 
-	db, err := sql.Open("mysql", d.connectionString)
+	db, err := sql.Open("mysql", d.connStr)
 	if err != nil {
 		log.Println("db:", err)
 		return
