@@ -4,6 +4,7 @@
 TODO
 ====
 * Use user certificates for multiuser support
+* Fork the project and make it into containers, just for fun.
 
 DONE v3.0
 =========
